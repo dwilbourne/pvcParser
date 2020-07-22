@@ -1,0 +1,8 @@
+parameters:
+
+	paths:
+		- ../src/array_utils/CartesianProduct
+
+	checkMissingIterableValueType: false
+	checkGenericClassInNonGenericObjectType: false
+
