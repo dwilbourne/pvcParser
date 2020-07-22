@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<!-- maybe there's a pretty way of doing this but not sure how to embed a constant like "fixtures_dir" into a raw XML file and not make it more trouble than it's worth...-->
+<!-- phpunit will look in the current working directory (e.g. wherever you are executing phpunit) and will not find an unqualified filename like "note.dtd" unless you -->
+<!-- happen to run the tst from the same directory that the test fixture lives in....-->
+
+<!-- note that the filename for the DTD is a url:  you cannot use backslashes for a DOS / Winwodws environment - all slashes must look like a standard URI. -->
+<!-- so whether it's D:/www/note.dtd" or "http://somedomain/com/note.dtd" does not matter - the system is reading it as a URI and retrieving the file through an http request -->
+
+<!DOCTYPE note SYSTEM "note.dtd">
+<note>
+  <to>Tove</to>
+  <from>Jani</from>
+  <heading>Reminder</heading>
+  <body>Don't forget me this weekend!</body>
+</note>
