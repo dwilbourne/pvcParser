@@ -33,7 +33,9 @@
 		"pvc/err": "@dev",
 		"pvc/regex": "@dev",
 		"pvc/intl": "@dev",
-		"pvc/utils": "@dev"
+		"pvc/utils": "@dev",
+		"pvc/frmtr": "@dev",
+		"pvc/struct": "@dev"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^8",
