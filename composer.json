@@ -35,7 +35,8 @@
 		"pvc/intl": "@dev",
 		"pvc/utils": "@dev",
 		"pvc/frmtr": "@dev",
-		"pvc/struct": "@dev"
+		"pvc/struct": "@dev",
+		"pvc/http": "@dev"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^8",
