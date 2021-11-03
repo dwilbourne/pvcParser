@@ -79,7 +79,7 @@ class MarkupSniffer
     protected function setCharset(string $charset): void
     {
         $cs = new Charset();
-        if ($cs->parseCharsetString($charset)) {
+        if ($cs->validate($charset)) {
             $this->charset = $cs;
         }
     }
