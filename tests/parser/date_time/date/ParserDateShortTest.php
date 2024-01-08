@@ -45,6 +45,29 @@ class ParserDateShortTest extends TestCase
         self::assertEquals($sep, $separators[1]);
     }
 
+    /**
+     * @function testGetPatternDatePartsOrder
+     * @param string $localeString
+     * @param string $expectedResult
+     * @throws \pvc\intl\err\InvalidLocaleException
+     * @datePartsOrderDataProvider datePartsOrderDataProvider
+     */
+    public function testGetPatternDatePartsOrder(string $localeString, string $expectedResult) : void
+    {
+        $locale = new locale($localeString);
+        self::assertEquals($expectedResult, $this->parser->getPatternDatePartsOrder($locale));
+    }
+
+    public function datePartsOrderDataProvider() : array
+    {
+        return [
+            'USA goes month day year' => ['en_US', 'mdy'],
+            'Germany goes day month year' => ['de_DE', 'dmy'],
+            'Canada goes year month day' => ['en_CA', 'ymd']
+        ];
+    }
+
+
     public function testSetGetDatePartsOrder() : void
     {
         $acceptableValues = ['ymd', 'dmy', 'mdy'];

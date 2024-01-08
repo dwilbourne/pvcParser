@@ -3,6 +3,7 @@
 namespace pvc\parser\date_time\date;
 
 use Carbon\Carbon;
+use IntlDateFormatter;
 use InvalidArgumentException;
 use pvc\err\throwable\exception\pvc_exceptions\InvalidValueException;
 use pvc\err\throwable\exception\pvc_exceptions\InvalidValueMsg;
@@ -161,6 +162,32 @@ class ParserDateShort extends ParserDate implements ParserInterface
         $z .= $patternArray[$this->datePartsOrder[2]];
         return $z;
     }
+
+    public function getPatternDatePartsOrder(Locale $locale) : string
+    {
+        $frmtr = new IntlDateFormatter((string) $locale, IntlDateFormatter::SHORT, IntlDateFormatter::NONE);
+        $fmt = $frmtr->getPattern();
+        /** this returns a 'date parts order' template that the ParserDateShort object can use */
+        switch (strtolower(substr($fmt, 0, 1))) {
+            case 'm':
+                $result = 'mdy';
+                break;
+            case 'd':
+                $result = 'dmy';
+                break;
+            /**
+             * not sure that there are any short date formats in the Gregorian calendar that do not start with
+             * 'm' or 'd' or 'y', so there's no code for any exception here.  Unrecognized formats fall into the
+             * default category.
+             */
+            case 'y':
+            default:
+                $result = 'ymd';
+                break;
+        }
+        return $result;
+    }
+
 
     /**
      * @function parse
