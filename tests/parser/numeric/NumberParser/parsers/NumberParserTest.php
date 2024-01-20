@@ -7,7 +7,6 @@
 
 namespace tests\parser\numeric\NumberParser\parsers;
 
-use Mockery;
 use NumberFormatter;
 use PHPUnit\Framework\TestCase;
 use pvc\intl\Locale;
@@ -17,12 +16,9 @@ use pvc\parser\numeric\NumberParser\core\NumberFormatterConfiguration;
 use pvc\parser\numeric\NumberParser\parsers\err\CalcNumDecimalPlacesException;
 use pvc\parser\numeric\NumberParser\parsers\NumberParser;
 use pvc\parser\numeric\NumberParser\precision\NumberParserPrecisionRangeNonNegative;
-use pvc\testingTraits\PrivateMethodTestingTrait;
 
 class NumberParserTest extends TestCase
 {
-
-    use PrivateMethodTestingTrait;
 
     protected Locale $locale;
     protected int $style;

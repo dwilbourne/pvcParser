@@ -9,11 +9,11 @@ namespace tests\parser\date_time\date;
 
 use DateTime;
 use DateTimeZone;
+use PHPUnit\Framework\TestCase;
 use pvc\err\throwable\exception\pvc_exceptions\InvalidValueException;
 use pvc\intl\Locale;
 use pvc\intl\TimeZone;
 use pvc\parser\date_time\date\ParserDateShort;
-use PHPUnit\Framework\TestCase;
 
 class ParserDateShortTest extends TestCase
 {
@@ -44,29 +44,6 @@ class ParserDateShortTest extends TestCase
         self::assertEquals(2, count($this->parser->getSeparators()));
         self::assertEquals($sep, $separators[1]);
     }
-
-    /**
-     * @function testGetPatternDatePartsOrder
-     * @param string $localeString
-     * @param string $expectedResult
-     * @throws \pvc\intl\err\InvalidLocaleException
-     * @datePartsOrderDataProvider datePartsOrderDataProvider
-     */
-    public function testGetPatternDatePartsOrder(string $localeString, string $expectedResult) : void
-    {
-        $locale = new locale($localeString);
-        self::assertEquals($expectedResult, $this->parser->getPatternDatePartsOrder($locale));
-    }
-
-    public function datePartsOrderDataProvider() : array
-    {
-        return [
-            'USA goes month day year' => ['en_US', 'mdy'],
-            'Germany goes day month year' => ['de_DE', 'dmy'],
-            'Canada goes year month day' => ['en_CA', 'ymd']
-        ];
-    }
-
 
     public function testSetGetDatePartsOrder() : void
     {

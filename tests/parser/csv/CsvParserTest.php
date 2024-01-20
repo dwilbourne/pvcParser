@@ -9,11 +9,11 @@ namespace tests\parser\csv;
 use PHPUnit\Framework\TestCase;
 use pvc\filesys\FileAccess;
 use pvc\parser\csv\CsvParser;
-use pvc\parser\csv\err\InvalidColumnHeadingException;
-use pvc\parser\csv\err\InvalidEscapeCharacterException;
-use pvc\parser\csv\err\InvalidFieldDelimiterException;
-use pvc\parser\csv\err\InvalidFieldEnclosureException;
-use pvc\parser\csv\err\InvalidLineTerminationException;
+use pvc\parser\err\InvalidColumnHeadingException;
+use pvc\parser\err\InvalidEscapeCharacterException;
+use pvc\parser\err\InvalidFieldDelimiterException;
+use pvc\parser\err\InvalidFieldEnclosureCharException;
+use pvc\parser\err\InvalidLineTerminationException;
 
 /**
  * Class CsvParserTest
@@ -103,7 +103,7 @@ class CsvParserTest extends TestCase
 
         // can be no more than one character
         $fec = "\\/";
-        self::expectException(InvalidFieldEnclosureException::class);
+        self::expectException(InvalidFieldEnclosureCharException::class);
         $this->parser->setFieldEnclosureChar($fec);
     }
 
@@ -260,7 +260,7 @@ class CsvParserTest extends TestCase
 
     /**
      * testFileWhileSettingColumnHeadingsManually
-     * @throws \pvc\parser\csv\err\InvalidColumnHeadingException
+     * @throws \pvc\parser\err\InvalidColumnHeadingException
      */
     public function testSettingColumnHeadingsManually() : void
     {

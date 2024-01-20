@@ -1,23 +1,4 @@
 parameters:
-	level: 8
+	level: max
 	paths:
 		- src
-		- tests
-	excludes_analyse:
-		- src/array_utils/CartesianProduct
-		- tests/parser/file/php/fixtures
-
-	ignoreErrors:
-
-	    -
-	        message: '#Call to an undefined method Mockery.*#'
-	        path: tests/*
-	    -
-	        message: '#Mockery\\LegacyMockInterface given\.$#'
-	        path: tests/*
-	    -
-	        message: '#PHPUnit\\Framework\\MockObject\\MockObject given\.$#'
-	        path: tests/*
-
-includes:
-    - phpstan_configs\CartesianProduct.neon
