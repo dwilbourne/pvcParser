@@ -3,6 +3,8 @@
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
+declare(strict_types=1);
+
 namespace pvcTests\parser\boolean;
 
 use PHPUnit\Framework\MockObject\MockObject;
@@ -69,7 +71,7 @@ class ParserBooleanLooseTest extends TestCase
             "'TrUe' is OK (not case sensitive) and evaluates to true" => ['TrUe', true, true],
             "'false' is OK and evaluates to false" => ['false', true, false],
             "'FaLsE' is OK (not case sensitive) and evaluates to false" => ['FaLsE', true, false],
-            "missplellings are right out" => ['FLasE', false]
+            'missplellings are right out' => ['FLasE', false]
 
         ];
     }

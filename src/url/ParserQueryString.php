@@ -1,44 +1,113 @@
 <?php
 /**
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
- * @version 1.0
  */
+
+declare(strict_types=1);
 
 namespace pvc\parser\url;
 
-use pvc\msg\MsgRetrievalInterface;
-use pvc\parser\ParserInterface;
+use pvc\err\stock\Exception;
+use pvc\http\err\InvalidQuerystringParamNameException;
+use pvc\http\url\QueryString;
+use pvc\interfaces\msg\MsgInterface;
+use pvc\parser\err\InvalidQuerystringSeparatorException;
+use pvc\parser\Parser;
 
 /**
- * This class is designed to encapsulate the functionality available in parse_str.  parse_str has some behaviors
- * that are not compliant with CGI standards (overwriting array entries defined in the querystring) and it
- * mangles variable names.  Encapsulation allows you to modify these behaviors if you want.  See the pvc php language
- * tests for an illustration of the behaviors.
+ * Class ParserQueryString
+ *
+ * @extends Parser<Querystring>
+ *
+ * parse_str has some issues, like it will mangle a parameter name in order to get it to conform to a PHP
+ * variable name.  This class does not do that.  The parameter names end up as indices in an associative array.
+ *
+ * See the discussion in the QueryString class for more information, but note that this class mirrors the behavior of
+ * http_build_query in some ways.  Just as http_build_query cannot generate a querystring with duplicate parameter
+ * names (e.g. it cannot produce '?a=4&a=5', this class cannot parse duplicate parameters as separates.  If it runs
+ * into '?a=4&a=5', the value of a will be 5.
+ *
  */
-
-class ParserQueryString implements ParserInterface
+class ParserQueryString extends Parser
 {
-    protected array $parsedValues = [];
+    protected string $separator = '&';
+
+    protected QueryString $qstr;
+
+    public function __construct(MsgInterface $msg, QueryString $qstr)
+    {
+        parent::__construct($msg);
+        $this->qstr = $qstr;
+    }
+
+    public function getSeparator(): string
+    {
+        return $this->separator;
+    }
+
+    public function setSeparator(string $separator): void
+    {
+        if (empty($separator)) {
+            throw new InvalidQuerystringSeparatorException();
+        }
+        $this->separator = $separator;
+    }
 
     /**
-     * parse
+     * parseValue
      * @param string $data
      * @return bool
+     * @throws InvalidQuerystringParamNameException
+     *
      */
-    public function parse(string $data): bool
+    public function parseValue(string $data): bool
     {
-        // parse_str never fails
-        parse_str($data, $this->parsedValues);
-        return true;
+        $params = [];
+        $data = trim($data, '?');
+
+        $paramStrings = explode($this->getSeparator(), $data);
+
+        foreach ($paramStrings as $paramString) {
+            $array = explode('=', $paramString);
+
+            /**
+             * cannot have a string like 'a' or 'a=1=2'
+             */
+            if (count($array) != 2) {
+                return false;
+            }
+
+            $paramName = $array[0];
+            $paramValue = $array[1];
+
+            /**
+             * parameter value cannot be null, that means you had a string like 'a='
+             */
+            if (empty($paramValue)) {
+                return false;
+            }
+
+            /**
+             * if the parameter name is duplicated in the querystring, this results in the last value being used
+             */
+            $params[$paramName] = $paramValue;
+        }
+
+        try {
+            $this->qstr->setParams($params);
+            $this->parsedValue = $this->qstr;
+            return true;
+        } catch (Exception $e) {
+            /** swallow the exception - parsers just return false if they fail */
+            return false;
+        }
     }
 
-    public function getParsedValue(): array
+    protected function setMsgContent(MsgInterface $msg): void
     {
-        return $this->parsedValues;
-    }
-
-    public function getErrmsg(): ?MsgRetrievalInterface
-    {
-        return null;
+        $msgId = 'invalid_querystring';
+        $msgParameters = [];
+        $domain = 'Parser';
+        $msg->setContent($domain, $msgId, $msgParameters);
     }
 }

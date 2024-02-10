@@ -25,7 +25,9 @@
 		"ext-iconv": "*",
 		"pvc/interfaces": "*",
 		"pvc/msg": "*",
-		"pvc/err": "*"
+		"pvc/err": "*",
+		"pvc/intl": "*",
+		"pvc/http": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9",

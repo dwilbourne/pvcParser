@@ -8,7 +8,8 @@ declare(strict_types=1);
 namespace pvcTests\parser\err;
 
 use pvc\err\XDataTestMaster;
-use pvc\validator\err\_ValidatorXData;
+use pvc\parser\err\_ParserXData;
+use ReflectionException;
 
 /**
  * Class _ValidatorXDataTest
@@ -17,17 +18,25 @@ class _ParserXDataTest extends XDataTestMaster
 {
     /**
      * testValidatorXData
-     * @throws \ReflectionException
-     * @covers \pvc\validator\err\_ValidatorXData::getLocalXCodes
-     * @covers \pvc\validator\err\_ValidatorXData::getXMessageTemplates
-     * @covers \pvc\validator\err\SetMaxException
-     * @covers \pvc\validator\err\SetMinException
-     * @covers \pvc\validator\err\InvalidLabelException
-     * @covers \pvc\validator\err\InvalidMsgIdException
+     * @throws ReflectionException
+     * @covers \pvc\parser\err\_ParserXData::getLocalXCodes
+     * @covers \pvc\parser\err\_ParserXData::getXMessageTemplates
+     * @covers \pvc\parser\err\DuplicateColumnHeadingException
+     * @covers \pvc\parser\err\InvalidColumnHeadingException
+     * @covers \pvc\parser\err\InvalidDateTimeTypeException
+     * @covers \pvc\parser\err\InvalidEscapeCharacterException
+     * @covers \pvc\parser\err\InvalidFieldDelimiterException
+     * @covers \pvc\parser\err\InvalidFieldEnclosureCharException
+     * @covers \pvc\parser\err\InvalidLineTerminationException
+     * @covers \pvc\parser\err\InvalidMsgIdException
+     * @covers \pvc\parser\err\InvalidQuerystringSeparatorException
+     * @covers \pvc\parser\err\InvalidReturnTypeException
+     * @covers \pvc\parser\err\NonExistentColumnHeadingException
+     * @covers \pvc\parser\err\NonExistentFilePathException
      */
-    public function testValidatorXData(): void
+    public function testParserXData(): void
     {
-        $xData = new _ValidatorXData();
+        $xData = new _ParserXData();
         self::assertTrue($this->verifyLibrary($xData));
     }
 }

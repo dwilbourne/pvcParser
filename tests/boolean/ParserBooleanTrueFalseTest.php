@@ -5,6 +5,8 @@
  * @version: 1.0
  */
 
+declare(strict_types=1);
+
 namespace pvcTests\parser\boolean;
 
 use PHPUnit\Framework\MockObject\MockObject;
@@ -27,14 +29,33 @@ class ParserBooleanTrueFalseTest extends TestCase
         $this->parser = new ParserBooleanTrueFalse($this->msg);
     }
 
+    public function testCaseSensitiveDefault(): void
+    {
+        self::assertFalse($this->parser->isCaseSensitive());
+    }
+
+    /**
+     * testSetIsCaseSensitive
+     * @covers \pvc\parser\boolean\ParserBooleanTrueFalse::setCaseSensitive
+     * @covers \pvc\parser\boolean\ParserBooleanTrueFalse::isCaseSensitive
+     */
+    public function testSetIsCaseSensitive(): void
+    {
+        $this->parser->setCaseSensitive(true);
+        self::assertTrue(($this->parser->isCaseSensitive()));
+
+        $this->parser->setCaseSensitive(false);
+        self::assertFalse($this->parser->isCaseSensitive());
+    }
+
     /**
      * @function testParseValue
      * @param string $input
      * @param bool $expectedResult
      * @param bool|null $parsedValue
      * @dataProvider dataProvider
-     * @covers       \pvc\parser\boolean\ParserBooleanOneZero::parseValue
-     * @covers       \pvc\parser\boolean\ParserBooleanOneZero::setMsgContent()
+     * @covers       \pvc\parser\boolean\ParserBooleanTrueFalse::parseValue
+     * @covers       \pvc\parser\boolean\ParserBooleanTrueFalse::setMsgContent()
      */
     public function testParseValue(
         string $input,

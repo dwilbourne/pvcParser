@@ -1,8 +1,9 @@
 <?php
 /**
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
- * @version 1.0
  */
+
+declare(strict_types=1);
 
 namespace pvcTests\parser\php\node_visitors;
 
@@ -10,6 +11,8 @@ use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
 use PHPUnit\Framework\TestCase;
+use pvc\parser\php\node_visitors\NodeVisitorFirstClass;
+use pvc\parser\php\node_visitors\NodeVisitorNamespace;
 use Throwable;
 
 class NodeVisitorIntegrationTest extends TestCase
@@ -32,7 +35,7 @@ class NodeVisitorIntegrationTest extends TestCase
     public function testNodeVisitorNamespace(): void
     {
         $traverser = new NodeTraverser();
-        $namespaceVisitor = new \pvc\parser\php\node_visitors\NodeVisitorNamespace();
+        $namespaceVisitor = new NodeVisitorNamespace();
         $traverser->addVisitor($namespaceVisitor);
         /* phpstan complains that $this->nodes could be null */
         /** @phpstan-ignore-next-line */
@@ -44,7 +47,7 @@ class NodeVisitorIntegrationTest extends TestCase
     {
         $traverser = new NodeTraverser();
         $nameResolver = new NameResolver();
-        $classVisitor = new \pvc\parser\php\node_visitors\NodeVisitorFirstClass();
+        $classVisitor = new NodeVisitorFirstClass();
         $traverser->addVisitor($nameResolver);
         $traverser->addVisitor($classVisitor);
         /* phpstan complains that $this->nodes could be null */

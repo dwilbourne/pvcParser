@@ -1,43 +1,118 @@
 <?php
+
 /**
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
- * @version 1.0
  */
+
+declare(strict_types=1);
 
 namespace pvcTests\parser\url;
 
 use PHPUnit\Framework\TestCase;
+use pvc\http\err\InvalidQuerystringParamNameException;
+use pvc\http\url\QueryString;
+use pvc\interfaces\msg\MsgInterface;
+use pvc\parser\err\InvalidQuerystringSeparatorException;
 use pvc\parser\url\ParserQueryString;
 
-/**
- * since the class being tested is a very simple encapsulation of parse_str, this test will not illustrate
- * all the behaviors that parse_str exhibits.  See the pvc language test suite for those illustrations
- */
 class ParserQueryStringTest extends TestCase
 {
+    protected MsgInterface $msg;
+    protected QueryString $qstr;
+
     protected ParserQueryString $parser;
 
     public function setUp(): void
     {
-        $this->parser = new ParserQueryString();
+        $this->msg = $this->createMock(MsgInterface::class);
+        $this->qstr = $this->createMock(QueryString::class);
+        $this->parser = new ParserQueryString($this->msg, $this->qstr);
     }
 
-    public function testParse(): void
+    /**
+     * testDefaultSeparatorExists
+     * @covers \pvc\parser\url\ParserQueryString::__construct
+     */
+    public function testDefaultSeparatorExists(): void
     {
-        // the parse method never fails - the test string could literally be any string you can imagine
-        self::assertTrue($this->parser->parse(''));
+        self::assertIsString($this->parser->getSeparator());
     }
 
-    public function testGetParsedValue(): void
+    /**
+     * testSetGetSeparator
+     * @covers \pvc\parser\url\ParserQueryString::setSeparator
+     * @covers \pvc\parser\url\ParserQueryString::getSeparator
+     */
+    public function testSetGetSeparator(): void
     {
-        self::assertTrue($this->parser->parse('this string kind of looks like an array ['));
-        self::assertTrue(is_array($this->parser->getParsedValue()));
-        self::assertEquals(1, sizeof($this->parser->getParsedValue()));
+        $newSeparator = ';';
+        $this->parser->setSeparator($newSeparator);
+        self::assertEquals($newSeparator, $this->parser->getSeparator());
     }
 
-    public function testErrorMessageIsAlwaysNull(): void
+    /**
+     * testSeparatorCannotBeEmpty
+     * @throws InvalidQuerystringSeparatorException
+     * @covers \pvc\parser\url\ParserQueryString::setSeparator
+     */
+    public function testSeparatorCannotBeEmpty(): void
     {
-        self::assertNull($this->parser->getErrmsg());
+        self::expectException(InvalidQuerystringSeparatorException::class);
+        $this->parser->setSeparator('');
     }
 
+    /**
+     * testParseFailsIfThereIsNoParameterValuePair
+     * @covers \pvc\parser\url\ParserQueryString::parseValue
+     */
+    public function testParseFailsIfThereIsNoParameterValuePair(): void
+    {
+        $qstrWithNoParamValuePair = 'this string kind of looks like an array [';
+        self::assertFalse($this->parser->parse($qstrWithNoParamValuePair));
+    }
+
+    /**
+     * testParseFailsIfThereIsNoValue
+     * @covers \pvc\parser\url\ParserQueryString::parseValue
+     */
+    public function testParseFailsIfThereIsNoValue(): void
+    {
+        $qstrWithNoValue = 'foo=';
+        self::assertFalse($this->parser->parse($qstrWithNoValue));
+    }
+
+    /**
+     * testParseFailsWithMalformedParamValuePair
+     * @covers \pvc\parser\url\ParserQueryString::parseValue
+     */
+    public function testParseFailsWithMalformedParamValuePair(): void
+    {
+        $qstrWithMalformedPair = 'foo=5=4&bar=9';
+        self::assertFalse($this->parser->parse($qstrWithMalformedPair));
+    }
+
+    /**
+     * testParseSuccess
+     * @covers \pvc\parser\url\ParserQueryString::parse
+     */
+    public function testParseSuccess(): void
+    {
+        $qstr = 'foo=good&bar=8';
+        $setParamArray = ['foo' => 'good', 'bar' => '8'];
+        $this->qstr->expects($this->once())->method('setParams')->with($setParamArray);
+        self::assertTrue($this->parser->parse($qstr));
+        self::assertEquals($this->qstr, $this->parser->getParsedValue());
+    }
+
+    public function testParseFailsWhenQuerystringSetParamsFails(): void
+    {
+        $qstr = 'foo=good&bar=8';
+        $setParamArray = ['foo' => 'good', 'bar' => '8'];
+        $this->qstr->expects($this->once())
+                   ->method('setParams')
+                   ->with($setParamArray)
+                   ->willThrowException(new InvalidQuerystringParamNameException());
+
+        self::assertFalse($this->parser->parse($qstr));
+    }
 }

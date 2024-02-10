@@ -13,31 +13,32 @@ use pvc\parser\err\InvalidColumnHeadingException;
 use pvc\parser\err\InvalidEscapeCharacterException;
 use pvc\parser\err\InvalidFieldDelimiterException;
 use pvc\parser\err\InvalidFieldEnclosureCharException;
-use pvc\parser\err\InvalidLineTerminationException;
 use pvc\parser\err\NonExistentColumnHeadingException;
+use pvc\parser\err\NonExistentFilePathException;
 use pvc\parser\Parser;
 
 /**
- * Class CsvParser.  This class restricts record termination characters to be either LF or CRLF (windows).
+ * Class CsvParser.  This class restricts record termination characters to be either LF or CRLF (windows).  PHP is
+ * supposed to automatically detect line endings with its verbs that extract lines from a file. This class uses fgetscsv
+ * and detects the presence of byte order marks at the beginning of the file
+ *
  * @extends Parser<array>
  */
 class CsvParser extends Parser
 {
-
-    /**
-     * @var array
-     */
-    protected array $columnHeadings;
-
     /**
      * @var string
      */
-    protected string $lineTermination = "\n";
+    protected string $filePath;
 
+    /**
+     * @var array <string>
+     */
+    protected array $columnHeadings;
     /**
      * @var non-empty-string
      */
-    protected string $fieldDelimiterChar = ",";
+    protected string $fieldDelimiterChar = ',';
 
     /**
      * @var string
@@ -54,24 +55,44 @@ class CsvParser extends Parser
      */
     protected bool $firstRowContainsColumnHeadings = false;
 
-    protected bool $autoDetectLineTermination = true;
-
     /**
      * setColumnHeadings
      * @param array<string> $columnHeadings
-     * @throws \pvc\parser\err\InvalidColumnHeadingException
+     * @throws InvalidColumnHeadingException|DuplicateColumnHeadingException
      */
     public function setColumnHeadings(array $columnHeadings) : void
     {
+        if (empty($columnHeadings)) {
+            throw new NonExistentColumnHeadingException();
+        }
+
+        /**
+         * re-initialize the attribute so that successive calls to the parser work properly
+         */
+        $this->columnHeadings = [];
+
         foreach ($columnHeadings as $columnHeading) {
-            /** characters in the column heading must all be printable */
-            if (!ctype_print($columnHeading)) {
+            /**
+             * must be a string
+             */
+            if (!is_string($columnHeading)) {
                 throw new InvalidColumnHeadingException();
             }
-            /** no duplicate column headings since they become indices into an array */
+
+            /**
+             * characters in the column heading must all be visible
+             */
+            if (!ctype_graph($columnHeading)) {
+                throw new InvalidColumnHeadingException();
+            }
+
+            /**
+             * no duplicate column headings since they become indices into an array
+             */
             if (in_array($columnHeading, $this->columnHeadings)) {
                 throw new DuplicateColumnHeadingException($columnHeading);
             }
+
             $this->columnHeadings[] = $columnHeading;
         }
     }
@@ -85,30 +106,6 @@ class CsvParser extends Parser
         return $this->columnHeadings;
     }
 
-    /**
-     * setLineTermination
-     * @param string $lineTerminator
-     * @throws InvalidLineTerminationException
-     */
-    public function setLineTermination(string $lineTerminator) : void
-    {
-        $validLineTerminators = ["\n", "\r\n"];
-        if (!in_array($lineTerminator, $validLineTerminators)) {
-            throw new InvalidLineTerminationException();
-        } else {
-            $this->lineTermination = $lineTerminator;
-        }
-    }
-
-    /**
-     * getLineTermination
-     * @return string
-     */
-    public function getLineTermination() : string
-    {
-        return $this->lineTermination;
-    }
-
     protected function isSingleVisibleCharacter(string $char): bool
     {
         return (ctype_graph($char) && (strlen($char) == 1));
@@ -117,7 +114,7 @@ class CsvParser extends Parser
     /**
      * setFieldDelimiterChar
      * @param string $delimiterChar
-     * @throws \pvc\parser\err\InvalidFieldDelimiterException
+     * @throws InvalidFieldDelimiterException
      */
     public function setFieldDelimiterChar(string $delimiterChar) : void
     {
@@ -140,7 +137,7 @@ class CsvParser extends Parser
     /**
      * setFieldEnclosureChar
      * @param string $enclosureChar
-     * @throws \pvc\parser\err\InvalidFieldEnclosureCharException
+     * @throws InvalidFieldEnclosureCharException
      */
     public function setFieldEnclosureChar(string $enclosureChar) : void
     {
@@ -163,7 +160,7 @@ class CsvParser extends Parser
     /**
      * setEscapeChar
      * @param string $escapeChar
-     * @throws \pvc\parser\err\InvalidEscapeCharacterException
+     * @throws InvalidEscapeCharacterException
      */
     public function setEscapeChar(string $escapeChar) : void
     {
@@ -193,160 +190,84 @@ class CsvParser extends Parser
         return $this->firstRowContainsColumnHeadings;
     }
 
-    public function getAutoDetectLineTermination(): bool
-    {
-        return $this->autoDetectLineTermination;
-    }
-
-    public function setAutoDetectLineTermination(bool $autoDetectLineTermination): void
-    {
-        $this->autoDetectLineTermination = $autoDetectLineTermination;
-    }
-
-
-    /**
-     * try to detect line termination.  Inevitably, you have to make a choice about how to handle weird cases where
-     * there are CRs and no succeeding LFs or a mix of CRLFs and plain LFs.  In this algorithm,
-     * if *every* occurrence of LF is preceded by a CR then it is a windows file.
-     *
-     * If there is *any* instance of an LF which is not preceded by a CR then it is non-windows.
-     *
-     * if there are no line feeds at all, then return false unless the string is empty.
-     */
-
-    public function detectLineTermination(string $csvData) : bool
-    {
-        $strlen = strlen($csvData);
-
-        if ($strlen == 0) {
-            // there can be no line termination character
-            return true;
-        }
-
-        /**
-         * are there any LFs in the file at all?
-         */
-        $linefeedsExist = false;
-        for ($i = 0; $i < strlen($csvData) - 1; $i++) {
-            if ($csvData[$i] == "\n") {
-                $linefeedsExist = true;
-                /** no need to run the loop any further */
-                break;
-            }
-        }
-
-        /**
-         * if there are no line feeds, termination character is not detectable via this algorithm
-         */
-        if (!$linefeedsExist) {
-            return false;
-        }
-
-        /**
-         * is every LF preceded by a CR?
-         */
-        $allLFsPrecededByCR = true;
-
-        if ($strlen == 1) {
-            /** if the length of the file is 1 then there is no possibility of a two character CRLF sequence */
-            $allLFsPrecededByCR = false;
-        } else {
-            for ($i = 1; $i < $strlen; $i++) {
-                if (($csvData[$i] == "\n") && ($csvData[$i - 1] != "\r")) {
-                    $allLFsPrecededByCR = false;
-                    /** no need to run the loop further */
-                    break;
-                }
-            }
-        }
-
-        /**
-         * set the line termination character and return true
-         */
-        if ($allLFsPrecededByCR) {
-            $this->setLineTermination("\r\n");
-        } else {
-            $this->setLineTermination("\n");
-        }
-
-        return true;
-    }
-
-    protected function setColumnHeadingsFromFirstRow(string $firstRow) : void
-    {
-        if (empty($firstRow)) {
-            throw new NonExistentColumnHeadingException();
-        }
-        $columnHeadings = str_getcsv(
-            $firstRow,
-            $this->getFieldDelimiterChar(),
-            $this->getFieldEnclosureChar(),
-            $this->getEscapeChar()
-        );
-        $this->setColumnHeadings($columnHeadings);
-    }
-
-    protected function parseRow(string $row) : array
-    {
-        $data = str_getcsv(
-            $row,
-            $this->getFieldDelimiterChar(),
-            $this->getFieldEnclosureChar(),
-            $this->getEscapeChar()
-        );
-        $columnHeadings = $this->getColumnHeadings();
-
-        // although it is tempting to try and use array_combine, array_combine will fail if the
-        // row of data parses into a different number of fields than are contained in $columnHeadings.
-        $newRow = [];
-        for ($i = 0; $i < count($data); $i++) {
-            if (isset($columnHeadings[$i])) {
-                $newRow[$columnHeadings[$i]] = $data[$i];
-            } else {
-                $newRow[] = $data[$i];
-            }
-        }
-        return $newRow;
-    }
-
     /**
      * parse
      * @param string $data
      * @return bool
-     * @throws \pvc\parser\err\NonExistentColumnHeadingException
+     * @throws NonExistentColumnHeadingException
      */
     protected function parseValue(string $data): bool
     {
-        // unfortunately, str_getcsv returns an empty row of data when passed an empty string.....
-        if (empty($data)) {
-            $this->parsedValue = [];
-            return true;
+        if (!file_exists($data)) {
+            throw new NonExistentFilePathException($data);
+        } else {
+            $handle = fopen($data, 'r');
+            $this->filePath = $data;
         }
 
-        if ($this->autoDetectLineTermination) {
-            $this->detectLineTermination($data);
+        $bom = "\xef\xbb\xbf";
+        if (fgets($handle, 4) !== $bom) {
+            // BOM not found - rewind pointer to start of file.
+            rewind($handle);
         }
 
-        // trim the line termination off the end of the string otherwise explode will create
-        // an extra empty record at the end of the record set
-        $rows = explode($this->getLineTermination(), trim($data, $this->getLineTermination()));
+        while (false !== ($line = (fgetcsv(
+                $handle,
+                null,
+            $this->getFieldDelimiterChar(),
+            $this->getFieldEnclosureChar(),
+            $this->getEscapeChar()
+            )))) {
+            /**
+             * fgetcsv returns an array with a single element consisting of a null value if the line is empty
+             */
+            if (!is_null($line[0])) {
+                $rows[] = $line;
+            }
+        }
 
+        /**
+         * if we are not at the end of the file then fgetcsv returned false because it could not parse a line.  Dunno
+         * that I know how to make it fail, but just to be safe.....
+         */
+        if (!feof($handle)) {
+            $this->setMsgContent($this->getMsg());
+            return false;
+        }
+        fclose($handle);
+
+        /**
+         * array_combine would automatically convert invalid array keys to strings, but it will not check
+         * for duplicate column names or verify that all the characters are graphic (e.g. visible), so the
+         * setColumnHeadings method ensures those things.  Also, array_combine fails if the number of headings does
+         * not match the number of elements in each and every row of data.  It is certainly possible to ensure the
+         * shapes match and reshape as necessary, but it's about as much trouble as handling each row manually......
+         */
         if ($this->getFirstRowContainsColumnHeadings()) {
-            $this->setColumnHeadingsFromFirstRow($rows[0]);
-            array_shift($rows);
+            $this->setColumnHeadings(array_shift($rows));
+            foreach ($rows as $row) {
+                $newRow = [];
+                foreach ($row as $index => $element) {
+                    if (isset($this->columnHeadings[$index])) {
+                        $newRow[$this->columnHeadings[$index]] = $element;
+                    } else {
+                        $newRow[$index] = $element;
+                    }
+                }
+                $this->parsedValue[] = $newRow;
+            }
+        } else {
+            $this->parsedValue = $rows;
         }
 
-        foreach ($rows as $index => $row) {
-            $rows[$index] = $this->parseRow($row);
-        }
-        $this->parsedValue = $rows;
         return true;
     }
 
     protected function setMsgContent(MsgInterface $msg): void
     {
-        /**
-         * no message to set because parseValue in this class always returns true
-         */
+        $msgId = 'csv_parser_failure';
+        $msgParameters = ['filePath' => $this->filePath];
+        $domain = 'Parser';
+        $msg->setContent($domain, $msgId, $msgParameters);
     }
 }

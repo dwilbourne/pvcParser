@@ -1,45 +1,47 @@
 <?php
 /**
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
- * @version 1.0
  */
+
+declare(strict_types=1);
 
 namespace pvc\parser\url;
 
-use pvc\msg\MsgRetrievalInterface;
-use pvc\parser\ParserInterface;
-use pvc\url\Url;
+use pvc\http\url\Url;
+use pvc\interfaces\msg\MsgInterface;
+use pvc\parser\Parser;
 
 /**
  * Class UrlParser
- * @package pvc\parser\url
  */
-class ParserUrl implements ParserInterface
+class ParserUrl extends Parser
 {
-    protected Url $url;
-    protected InvalidUrlMsg $errMsg;
-
-    public function parse(string $data): bool
+    /**
+     * parseValue
+     * @param string $data
+     * @return bool
+     */
+    public function parseValue(string $data): bool
     {
         $parsedResult = parse_url($data);
 
         if (false === $parsedResult) {
-            $this->errMsg = new InvalidUrlMsg($data);
             return false;
+        } else {
+            $this->parsedValue = new Url($parsedResult);
+            return true;
         }
-
-        $this->url = new Url();
-        $this->url->setAttributesFromArray($parsedResult);
-        return true;
     }
 
-    public function getParsedValue()
+    /**
+     * setMsgContent
+     * @param MsgInterface $msg
+     */
+    protected function setMsgContent(MsgInterface $msg): void
     {
-        return $this->url;
-    }
-
-    public function getErrmsg(): ?MsgRetrievalInterface
-    {
-        return $this->errMsg ?? null;
+        $msgId = 'invalid_url';
+        $msgParameters = [];
+        $domain = 'Parser';
+        $this->msg->setContent($domain, $msgId, $msgParameters);
     }
 }

@@ -27,6 +27,10 @@ class _ParserXData extends XDataAbstract
             InvalidFieldEnclosureCharException::class => 1005,
             InvalidEscapeCharacterException::class => 1006,
             NonExistentColumnHeadingException::class => 1007,
+            NonExistentFilePathException::class => 1008,
+            InvalidReturnTypeException::class => 1009,
+            InvalidQuerystringSeparatorException::class => 1010,
+            InvalidDateTimeTypeException::class => 1011,
         ];
     }
 
@@ -41,6 +45,10 @@ class _ParserXData extends XDataAbstract
             InvalidFieldEnclosureCharException::class => 'Field enclosure character must be a single character and be visible',
             InvalidEscapeCharacterException::class => 'Escape character must be a single character',
             NonExistentColumnHeadingException::class => 'Flag set to get column headings from first row of data but data is empty.',
+            NonExistentFilePathException::class => 'Cannot open file ${filePath}',
+            InvalidDateTimeTypeException::class => 'Invalid Date Type / Time Type specified - see documentation for the php IntlDateFormatter class',
+            InvalidReturnTypeException::class => 'Invalid return type, must be either NumberFormatter::TYPE_INT64, or NumberFormatter::TYPE_DOUBLE',
+            InvalidQuerystringSeparatorException::class => 'Querystring separator cannot be empty.',
         ];
     }
 }

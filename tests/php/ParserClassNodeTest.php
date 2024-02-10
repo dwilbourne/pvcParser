@@ -1,34 +1,44 @@
 <?php
 /**
- * @package: pvc
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
- * @version: 1.0
  */
+
+declare(strict_types=1);
 
 namespace pvcTests\parser\php;
 
 use PHPUnit\Framework\TestCase;
-use pvc\err\throwable\exception\stock_rebrands\InvalidArgumentException;
+use pvc\parser\err\NonExistentFilePathException;
 use pvc\parser\php\ParserClassNode;
 use pvcTests\parser\php\fixtures\baz;
 
 class ParserClassNodeTest extends TestCase
 {
-    protected \pvc\parser\php\ParserClassNode $parser;
+    protected ParserClassNode $parser;
 
     public function setUp(): void
     {
         $this->parser = new ParserClassNode();
     }
 
+    /**
+     * testParseBadFilename
+     * @throws NonExistentFilePathException
+     * @covers \pvc\parser\php\ParserClassNode::parse
+     */
     public function testParseBadFilename(): void
     {
         $filename = 'foo.php';
-        self::expectException(InvalidArgumentException::class);
+        self::expectException(NonExistentFilePathException::class);
         // suppress the E_WARNING that comes back when the file is not found
         $node = @$this->parser->parse($filename);
     }
 
+    /**
+     * testParseFileWithNoClass
+     * @throws NonExistentFilePathException
+     * @covers \pvc\parser\php\ParserClassNode::parse
+     */
     public function testParseFileWithNoClass(): void
     {
         $fixture = __DIR__ . '/fixtures/foo.php';
@@ -36,6 +46,9 @@ class ParserClassNodeTest extends TestCase
     }
 
     /**
+     * testParseFileClassWithNoNamespace
+     * @throws NonExistentFilePathException
+     * @covers \pvc\parser\php\ParserClassNode::parse
      * test to make sure the 'namespacedName' attribute is still set for a class that has no namespace.
      */
     public function testParseFileClassWithNoNamespace(): void
@@ -47,6 +60,11 @@ class ParserClassNodeTest extends TestCase
         }
     }
 
+    /**
+     * testParseFileClassWithNamespace
+     * @throws NonExistentFilePathException
+     * @covers \pvc\parser\php\ParserClassNode::parse
+     */
     public function testParseFileClassWithNamespace(): void
     {
         $fixture = __DIR__ . '/fixtures/baz.php';
@@ -56,6 +74,11 @@ class ParserClassNodeTest extends TestCase
         }
     }
 
+    /**
+     * testParseFileWithNoNodes
+     * @throws NonExistentFilePathException
+     * @covers \pvc\parser\php\ParserClassNode::parse
+     */
     public function testParseFileWithNoNodes(): void
     {
         $fixture = __DIR__ . '/fixtures/null.php';

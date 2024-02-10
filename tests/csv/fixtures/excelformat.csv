@@ -1,0 +1,4 @@
+"Name","Template","Reference"
+"1d-interleaved-parityfec","audio/1d-interleaved-parityfec","[RFC6015]","an extra fourth column"
+"32kadpcm","audio/32kadpcm","[RFC3802][RFC2421]"
+"3gpp","audio/3gpp","[RFC3839][RFC6381]"

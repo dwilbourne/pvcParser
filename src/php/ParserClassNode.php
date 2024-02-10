@@ -1,9 +1,9 @@
 <?php
 /**
- * @package: pvc
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
- * @version: 1.0
  */
+
+declare(strict_types=1);
 
 namespace pvc\parser\php;
 
@@ -11,8 +11,7 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
-use pvc\err\throwable\exception\stock_rebrands\InvalidArgumentException;
-use pvc\err\throwable\exception\stock_rebrands\InvalidArgumentMsg;
+use pvc\parser\err\NonExistentFilePathException;
 use pvc\parser\php\node_visitors\NodeVisitorFirstClass;
 
 /**
@@ -26,8 +25,7 @@ class ParserClassNode
     public function parse(string $fileName) : ?Class_
     {
         if (false === ($code = file_get_contents($fileName))) {
-            $msg = new InvalidArgumentMsg('valid filename');
-            throw new InvalidArgumentException($msg);
+            throw new NonExistentFilePathException($fileName);
         }
         $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
         $nodes = $parser->parse($code);
