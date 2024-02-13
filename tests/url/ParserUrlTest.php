@@ -9,7 +9,7 @@ namespace pvcTests\parser\url;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use pvc\http\url\Url;
+use pvc\interfaces\http\UrlInterface;
 use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\url\ParserUrl;
 
@@ -20,12 +20,36 @@ class ParserUrlTest extends TestCase
 {
     protected MsgInterface|MockObject $msg;
 
+    protected UrlInterface $url;
+
     protected ParserUrl $parser;
 
     public function setUp(): void
     {
         $this->msg = $this->createMock(MsgInterface::class);
-        $this->parser = new ParserUrl($this->msg);
+        $this->url = $this->createMock(UrlInterface::class);
+        $this->parser = new ParserUrl($this->msg, $this->url);
+    }
+
+    /**
+     * testConstruct
+     * @covers \pvc\parser\url\ParserUrl::__construct
+     */
+    public function testConstruct(): void
+    {
+        self::assertInstanceOf(ParserUrl::class, $this->parser);
+    }
+
+    /**
+     * testSetGetUrl
+     * @covers \pvc\parser\url\ParserUrl::setUrl
+     * @covers \pvc\parser\url\ParserUrl::getUrl
+     */
+    public function testSetGetUrl(): void
+    {
+        $url = $this->createMock(UrlInterface::class);
+        $this->parser->setUrl($url);
+        self::assertEquals($url, $this->parser->getUrl());
     }
 
     /**
@@ -45,8 +69,8 @@ class ParserUrlTest extends TestCase
             'query' => 'arg=value',
             'fragment' => 'anchor'
         ];
+        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
         self::assertTrue($this->parser->parse($urlString));
-        self::assertInstanceOf(Url::class, $this->parser->getParsedValue());
     }
 
     /**
@@ -56,17 +80,13 @@ class ParserUrlTest extends TestCase
     public function testMissingUrlParts(): void
     {
         $urlString = '//www.example.com/path?googleguy=googley';
+        $values = [
+            'host' => 'www.example.com',
+            'path' => '/path',
+            'query' => 'googleguy=googley',
+        ];
+        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
         self::assertTrue($this->parser->parse($urlString));
-        $url = $this->parser->getParsedValue();
-
-        $expectedHost = 'www.example.com';
-        $expectedPath = '/path';
-        $expectedQuery = 'googleguy=googley';
-
-        self::assertNull($url->getScheme());
-        self::assertEquals($expectedHost, $url->getHost());
-        self::assertEquals($expectedPath, $url->getPath());
-        self::assertEquals($expectedQuery, $url->getQuery());
     }
 
     /**
@@ -89,22 +109,25 @@ class ParserUrlTest extends TestCase
      */
     public function testReservedChars(): void
     {
-        $reservedChars = ['!', '*', '\'', '(', ')', ':', ';', '@', '&', '=', '+', '$', ',', '/', '?', '#', '[', ']'];
+        $reservedChars = ['!', '*', '\'', '(', ')', ':', ';', '@', '&', '=', '+', ',', '/', '?', '$', '#', '[', ']'];
 
         // reserved chars in the path component
         $urlString = 'http://www.somehost.com/' . implode($reservedChars);
+        $values = [
+            'scheme' => 'http',
+            'host' => 'www.somehost.com',
 
+            /**
+             * the '?' which is five characters from the end of the reserved characters array is interpreted as the
+             * delimiter for a querystring.  The '#', which is three characters from the end, is recognized as the
+             * fragment delimiter.
+             */
+            'path' => '/' . implode(array_slice($reservedChars, 0, array_search('?', $reservedChars))),
+            'query' => '$',
+            'fragment' => '[]',
+        ];
+        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
         self::assertTrue($this->parser->parse($urlString));
-        $url = $this->parser->getParsedValue();
-
-        self::assertEquals('http', $url->getScheme());
-        self::assertEquals('www.somehost.com', $url->getHost());
-
-        // the '?' which is four characters from the end of the reserved characters array is interpreted as the
-        // delimiter for a querystring.
-
-        $expected = '/' . implode(array_slice($reservedChars, 0, array_search('?', $reservedChars)));
-        self::assertEquals($expected, $url->getPath());
     }
 
 
@@ -116,17 +139,23 @@ class ParserUrlTest extends TestCase
      */
     public function testMultibyteCharInPath(): void
     {
-        // \u{263A} is a smiley face.  Note that in Windows you MUST use double quotes (not single quotes)
-        // as the string delimiter in order to use unicode codepoints
+        /**
+         * \u{263A} is a smiley face.  Note that in Windows you MUST use double quotes (not single quotes)
+         * as the string delimiter in order to use unicode codepoints
+         */
         $pathWithMultibyteCharSmileyFace = '/Hello/World' . "\u{263A}";
 
         // the path has 13 characters: 12 plus the smiley face
         self::assertEquals(13, mb_strlen($pathWithMultibyteCharSmileyFace));
 
         $urlString = 'http://www.nowhere.com' . $pathWithMultibyteCharSmileyFace;
+        $values = [
+            'scheme' => 'http',
+            'host' => 'www.nowhere.com',
+            'path' => $pathWithMultibyteCharSmileyFace,
+        ];
+        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
         self::assertTrue($this->parser->parse($urlString));
-        $url = $this->parser->getParsedValue();
-        self::assertEquals($pathWithMultibyteCharSmileyFace, $url->getPath());
     }
 
     /**
@@ -138,16 +167,24 @@ class ParserUrlTest extends TestCase
         $scheme = 'http://';
         $hostFirstPart = 'no';
         $hostLastPart = 'where.com';
-        // "BELL" control character - illegal
+
+        /**
+         * "BELL" control character - illegal
+         */
         $illegalChar = chr(0x7);
+        $host = $hostFirstPart . $illegalChar . $hostLastPart;
 
-        $urlString = $scheme . $hostFirstPart . $illegalChar . $hostLastPart;
+        $urlString = 'http://' . $host;
 
-        // documentation on parse_url says illegal characters are replaced by '_'.
+        /**
+         * documentation on parse_url says illegal characters are replaced by '_'.
+         */
         $expectedHost = $hostFirstPart . '_' . $hostLastPart;
-
+        $values = [
+            'scheme' => 'http',
+            'host' => $expectedHost,
+        ];
+        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
         self::assertTrue($this->parser->parse($urlString));
-        $url = $this->parser->getParsedValue();
-        self::assertEquals($expectedHost, $url->getHost());
     }
 }

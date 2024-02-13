@@ -15,6 +15,8 @@ use pvc\parser\Parser;
 
 /**
  * Class NumericParser
+ * @extends Parser<DataType>
+ * @template DataType
  *
  * This is a wrapper for php's NumberFormatter class.  The child classes of this class simply set up different
  * flavors of NumberFormatter for some common scenarios.  You can access the underlying NumberFormatter object and
@@ -98,6 +100,7 @@ abstract class NumericParser extends Parser
     {
         $pos = 0;
         $expectedPos = strlen($data);
+        /** @var DataType $result */
         $result = $this->frmtr->parse($data, $this->getReturnType(), $pos);
 
         /**
@@ -106,7 +109,7 @@ abstract class NumericParser extends Parser
          * more from the x + 1 character to the end of the string.  The $pos variable holds the offset of the last
          * character successfully parsed.
          */
-        if ($pos == $expectedPos) {
+        if (($pos == $expectedPos) && ($result !== false)) {
             $this->parsedValue = $result;
             return true;
         } else {

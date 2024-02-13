@@ -12,7 +12,8 @@ use pvc\interfaces\intl\LocaleInterface;
 use pvc\interfaces\msg\MsgInterface;
 
 /**
- * Class DecimalParser.
+ * Class DecimalParser
+ * @extends NumericParser<float>
  *
  * You can set the min and max number of permitted fractional digits in the string to be parsed as well as the
  * rounding mode for the remaining portion of the input string.

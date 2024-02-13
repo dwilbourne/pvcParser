@@ -20,7 +20,10 @@ use pvc\msg\HasMsgTrait;
  */
 abstract class Parser implements ParserInterface
 {
-    use HasMsgTrait;
+    /**
+     * @var MsgInterface
+     */
+    protected MsgInterface $msg;
 
     /**
      * @var DataType
@@ -31,6 +34,24 @@ abstract class Parser implements ParserInterface
     public function __construct(MsgInterface $msg)
     {
         $this->setMsg($msg);
+    }
+
+    /**
+     * getMsg
+     * @return MsgInterface
+     */
+    public function getMsg(): MsgInterface
+    {
+        return $this->msg;
+    }
+
+    /**
+     * setMsg
+     * @param MsgInterface $msg
+     */
+    public function setMsg(MsgInterface $msg): void
+    {
+        $this->msg = $msg;
     }
 
     /**

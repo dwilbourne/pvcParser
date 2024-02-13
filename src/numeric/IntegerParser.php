@@ -14,6 +14,7 @@ use pvc\interfaces\msg\MsgInterface;
 
 /**
  * Class IntegerParser
+ * @extends NumericParser<int>
  * Parses a string of numbers into an integer.  Does not accept grouping separators by default.
  */
 class IntegerParser extends NumericParser

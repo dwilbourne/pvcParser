@@ -8,9 +8,10 @@ declare(strict_types=1);
 
 namespace pvcTests\parser\url;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use pvc\http\err\InvalidQuerystringParamNameException;
-use pvc\http\url\QueryString;
+use pvc\http\err\InvalidQuerystringException;
+use pvc\interfaces\http\QueryStringInterface;
 use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\err\InvalidQuerystringSeparatorException;
 use pvc\parser\url\ParserQueryString;
@@ -18,15 +19,27 @@ use pvc\parser\url\ParserQueryString;
 class ParserQueryStringTest extends TestCase
 {
     protected MsgInterface $msg;
-    protected QueryString $qstr;
+    protected QueryStringInterface|MockObject $qstr;
 
     protected ParserQueryString $parser;
 
     public function setUp(): void
     {
         $this->msg = $this->createMock(MsgInterface::class);
-        $this->qstr = $this->createMock(QueryString::class);
+        $this->qstr = $this->createMock(QueryStringInterface::class);
         $this->parser = new ParserQueryString($this->msg, $this->qstr);
+    }
+
+    /**
+     * testSetGetQueryString
+     * @covers \pvc\parser\url\ParserQueryString::setQueryString()
+     * @covers \pvc\parser\url\ParserQueryString::getQueryString()
+     */
+    public function testSetGetQueryString(): void
+    {
+        $qstr = $this->createMock(QueryStringInterface::class);
+        $this->parser->setQueryString($qstr);
+        self::assertEquals($qstr, $this->parser->getQueryString());
     }
 
     /**
@@ -62,23 +75,23 @@ class ParserQueryStringTest extends TestCase
     }
 
     /**
-     * testParseFailsIfThereIsNoParameterValuePair
+     * testParseSucceedsIfThereIsNoEqualsSignOrParameterValue
      * @covers \pvc\parser\url\ParserQueryString::parseValue
      */
-    public function testParseFailsIfThereIsNoParameterValuePair(): void
+    public function testParseSucceedsIfThereIsNoEqualsSignOrParameterValue(): void
     {
         $qstrWithNoParamValuePair = 'this string kind of looks like an array [';
-        self::assertFalse($this->parser->parse($qstrWithNoParamValuePair));
+        self::assertTrue($this->parser->parse($qstrWithNoParamValuePair));
     }
 
     /**
      * testParseFailsIfThereIsNoValue
      * @covers \pvc\parser\url\ParserQueryString::parseValue
      */
-    public function testParseFailsIfThereIsNoValue(): void
+    public function testParseSucceedsIfThereIsAnEqualsSignButNoValue(): void
     {
         $qstrWithNoValue = 'foo=';
-        self::assertFalse($this->parser->parse($qstrWithNoValue));
+        self::assertTrue($this->parser->parse($qstrWithNoValue));
     }
 
     /**
@@ -104,15 +117,22 @@ class ParserQueryStringTest extends TestCase
         self::assertEquals($this->qstr, $this->parser->getParsedValue());
     }
 
+    /**
+     * testParseFailsWhenQuerystringSetParamsFails
+     * @covers \pvc\parser\url\ParserQueryString::parseValue
+     * @covers \pvc\parser\url\ParserQueryString::setMsgContent
+     */
     public function testParseFailsWhenQuerystringSetParamsFails(): void
     {
-        $qstr = 'foo=good&bar=8';
-        $setParamArray = ['foo' => 'good', 'bar' => '8'];
-        $this->qstr->expects($this->once())
-                   ->method('setParams')
-                   ->with($setParamArray)
-                   ->willThrowException(new InvalidQuerystringParamNameException());
+        $testQstr = 'foo=good&bar=8';
 
-        self::assertFalse($this->parser->parse($qstr));
+        /**
+         * the try throw catch in ParserQueryString catches any exception.  In real life, the QueryString object
+         * throws an InvalidQueryStringException, but it's not important to this test.
+         */
+        $this->qstr->method('setParams')
+                   ->willThrowException(new InvalidQuerystringException());
+        $this->msg->expects($this->once())->method('setContent');
+        self::assertFalse($this->parser->parse($testQstr));
     }
 }

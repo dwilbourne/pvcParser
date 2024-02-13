@@ -33,6 +33,7 @@ class _ParserXDataTest extends XDataTestMaster
      * @covers \pvc\parser\err\InvalidReturnTypeException
      * @covers \pvc\parser\err\NonExistentColumnHeadingException
      * @covers \pvc\parser\err\NonExistentFilePathException
+     * @covers \pvc\parser\err\FileHandleException
      */
     public function testParserXData(): void
     {

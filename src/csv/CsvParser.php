@@ -9,6 +9,7 @@ namespace pvc\parser\csv;
 
 use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\err\DuplicateColumnHeadingException;
+use pvc\parser\err\FileHandleException;
 use pvc\parser\err\InvalidColumnHeadingException;
 use pvc\parser\err\InvalidEscapeCharacterException;
 use pvc\parser\err\InvalidFieldDelimiterException;
@@ -99,7 +100,7 @@ class CsvParser extends Parser
 
     /**
      * getColumnHeadings
-     * @return array
+     * @return array<string>
      */
     public function getColumnHeadings() : array
     {
@@ -113,7 +114,7 @@ class CsvParser extends Parser
 
     /**
      * setFieldDelimiterChar
-     * @param string $delimiterChar
+     * @param non-empty-string $delimiterChar
      * @throws InvalidFieldDelimiterException
      */
     public function setFieldDelimiterChar(string $delimiterChar) : void
@@ -201,7 +202,9 @@ class CsvParser extends Parser
         if (!file_exists($data)) {
             throw new NonExistentFilePathException($data);
         } else {
-            $handle = fopen($data, 'r');
+            if (false == ($handle = fopen($data, 'r'))) {
+                throw new FileHandleException($data);
+            }
             $this->filePath = $data;
         }
 
@@ -211,6 +214,7 @@ class CsvParser extends Parser
             rewind($handle);
         }
 
+        $rows = [];
         while (false !== ($line = (fgetcsv(
                 $handle,
                 null,
@@ -243,8 +247,13 @@ class CsvParser extends Parser
          * not match the number of elements in each and every row of data.  It is certainly possible to ensure the
          * shapes match and reshape as necessary, but it's about as much trouble as handling each row manually......
          */
+
         if ($this->getFirstRowContainsColumnHeadings()) {
-            $this->setColumnHeadings(array_shift($rows));
+            $firstRow = array_shift($rows);
+            if ($firstRow) {
+                $this->setColumnHeadings($firstRow);
+            }
+
             foreach ($rows as $row) {
                 $newRow = [];
                 foreach ($row as $index => $element) {

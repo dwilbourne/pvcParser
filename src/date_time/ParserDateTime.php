@@ -15,6 +15,9 @@ use pvc\parser\Parser;
 
 /**
  * Class ParserDateTime
+ * @extends Parser<float>
+ *     parsedValue is a timestamp.  This class has no notion of whether the pattern in IntlDateFormatter permits
+ * fractions of a second or not so the data type for the parsedValue is treated as a float, not an int
  */
 abstract class ParserDateTime extends Parser
 {

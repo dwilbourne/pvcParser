@@ -24,12 +24,10 @@
 		"ext-json": "*",
 		"ext-iconv": "*",
 		"pvc/interfaces": "*",
-		"pvc/msg": "*",
-		"pvc/err": "*",
-		"pvc/intl": "*",
-		"pvc/http": "*"
+		"pvc/err": "*"
 	},
 	"require-dev": {
+		"pvc/http": "*",
 		"phpunit/phpunit": "^9",
 		"squizlabs/php_codesniffer": "*",
 		"friendsofphp/php-cs-fixer": "*",

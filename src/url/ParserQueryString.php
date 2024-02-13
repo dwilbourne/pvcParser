@@ -8,16 +8,16 @@ declare(strict_types=1);
 namespace pvc\parser\url;
 
 use pvc\err\stock\Exception;
-use pvc\http\err\InvalidQuerystringParamNameException;
-use pvc\http\url\QueryString;
+use pvc\interfaces\http\QueryStringInterface;
 use pvc\interfaces\msg\MsgInterface;
+use pvc\interfaces\parser\ParserQueryStringInterface;
 use pvc\parser\err\InvalidQuerystringSeparatorException;
 use pvc\parser\Parser;
 
 /**
  * Class ParserQueryString
  *
- * @extends Parser<Querystring>
+ * @extends Parser<QueryStringInterface>
  *
  * parse_str has some issues, like it will mangle a parameter name in order to get it to conform to a PHP
  * variable name.  This class does not do that.  The parameter names end up as indices in an associative array.
@@ -28,23 +28,60 @@ use pvc\parser\Parser;
  * into '?a=4&a=5', the value of a will be 5.
  *
  */
-class ParserQueryString extends Parser
+class ParserQueryString extends Parser implements ParserQueryStringInterface
 {
+    /**
+     * @var non-empty-string
+     */
     protected string $separator = '&';
 
-    protected QueryString $qstr;
+    /**
+     * @var QueryStringInterface
+     */
+    protected QueryStringInterface $qstr;
 
-    public function __construct(MsgInterface $msg, QueryString $qstr)
+    /**
+     * @param MsgInterface $msg
+     * @param QueryStringInterface $qstr
+     */
+    public function __construct(MsgInterface $msg, QueryStringInterface $qstr)
     {
         parent::__construct($msg);
         $this->qstr = $qstr;
     }
 
+    /**
+     * getQueryString
+     * @return QueryStringInterface
+     */
+    public function getQueryString(): QueryStringInterface
+    {
+        return $this->qstr;
+    }
+
+    /**
+     * setQueryString
+     * @param QueryStringInterface $queryString
+     */
+    public function setQueryString(QueryStringInterface $queryString): void
+    {
+        $this->qstr = $queryString;
+    }
+
+    /**
+     * getSeparator
+     * @return non-empty-string
+     */
     public function getSeparator(): string
     {
         return $this->separator;
     }
 
+    /**
+     * setSeparator
+     * @param non-empty-string $separator
+     * @throws InvalidQuerystringSeparatorException
+     */
     public function setSeparator(string $separator): void
     {
         if (empty($separator)) {
@@ -55,9 +92,9 @@ class ParserQueryString extends Parser
 
     /**
      * parseValue
+     * parses a querystring to the html standard
      * @param string $data
      * @return bool
-     * @throws InvalidQuerystringParamNameException
      *
      */
     public function parseValue(string $data): bool
@@ -71,21 +108,15 @@ class ParserQueryString extends Parser
             $array = explode('=', $paramString);
 
             /**
-             * cannot have a string like 'a' or 'a=1=2'
+             * cannot have a string like 'a=1=2'.  Need 0 or 1 equals signs.  Zero equals signs is a parameter with no
+             * value attached
              */
-            if (count($array) != 2) {
+            if (count($array) > 2) {
                 return false;
             }
 
             $paramName = $array[0];
-            $paramValue = $array[1];
-
-            /**
-             * parameter value cannot be null, that means you had a string like 'a='
-             */
-            if (empty($paramValue)) {
-                return false;
-            }
+            $paramValue = $array[1] ?? '';
 
             /**
              * if the parameter name is duplicated in the querystring, this results in the last value being used
@@ -94,13 +125,13 @@ class ParserQueryString extends Parser
         }
 
         try {
-            $this->qstr->setParams($params);
-            $this->parsedValue = $this->qstr;
-            return true;
+            $this->getQueryString()->setParams($params);
         } catch (Exception $e) {
             /** swallow the exception - parsers just return false if they fail */
             return false;
         }
+        $this->parsedValue = $this->qstr;
+        return true;
     }
 
     protected function setMsgContent(MsgInterface $msg): void
