@@ -50,7 +50,6 @@ class ParserBooleanLoose extends Parser
     {
         $msgId = 'not_boolean_loose';
         $msgParameters = [];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

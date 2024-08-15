@@ -64,7 +64,6 @@ class ParserBooleanTrueFalse extends Parser
         $text = 'case-sensitive';
         $text .= ($this->isCaseSensitive() ? '' : 'not ') . $text;
         $msgParameters = ['caseSensitive' => $text];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

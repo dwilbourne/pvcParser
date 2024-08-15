@@ -8,22 +8,21 @@ declare(strict_types=1);
 
 namespace pvc\parser\date_time;
 
+use DateTimeZone;
 use IntlDateFormatter;
 use pvc\interfaces\intl\LocaleInterface;
-use pvc\interfaces\intl\TimeZoneInterface;
 use pvc\interfaces\msg\MsgInterface;
+use pvc\parser\err\InvalidDateTimeTypeException;
 
 class ParserDateShort extends ParserDateTime
 {
-    public function __construct(MsgInterface $msg, LocaleInterface $locale, TimeZoneInterface $timeZone)
+    /**
+     * @throws InvalidDateTimeTypeException
+     */
+    public function __construct(MsgInterface $msg, LocaleInterface $locale, DateTimeZone $timeZone)
     {
-        $formatter = new IntlDateFormatter(
-            (string)$locale,
-            IntlDateFormatter::SHORT,
-            IntlDateFormatter::NONE,
-            (string)$timeZone
-        );
-        parent::__construct($msg, $locale, $timeZone, $formatter);
+        parent::__construct($msg, $locale, $timeZone);
+        parent::setDateType(IntlDateFormatter::SHORT);
     }
 
 
@@ -31,7 +30,6 @@ class ParserDateShort extends ParserDateTime
     {
         $msgId = 'not_short_date';
         $msgParameters = [];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

@@ -276,7 +276,6 @@ class CsvParser extends Parser
     {
         $msgId = 'csv_parser_failure';
         $msgParameters = ['filePath' => $this->filePath];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

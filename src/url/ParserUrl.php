@@ -61,7 +61,6 @@ class ParserUrl extends Parser
     {
         $msgId = 'invalid_url';
         $msgParameters = [];
-        $domain = 'Parser';
-        $this->msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

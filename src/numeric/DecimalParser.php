@@ -36,7 +36,6 @@ class DecimalParser extends NumericParser
     {
         $msgId = 'not_decimal';
         $msgParameters = [];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

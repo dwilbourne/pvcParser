@@ -10,7 +10,6 @@ namespace pvc\parser;
 
 use pvc\interfaces\msg\MsgInterface;
 use pvc\interfaces\parser\ParserInterface;
-use pvc\msg\HasMsgTrait;
 
 /**
  * Parser creates a few default implementation methods for child classes that implement ParserInterface.
@@ -99,6 +98,11 @@ abstract class Parser implements ParserInterface
         }
 
         return true;
+    }
+
+    public function getMsgDomain(): string
+    {
+        return 'Parser';
     }
 
     abstract protected function parseValue(string $data): bool;

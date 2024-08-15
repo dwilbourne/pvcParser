@@ -44,7 +44,6 @@ class ParserBooleanOneZero extends Parser
     {
         $msgId = 'not_boolean_one_zero';
         $msgParameters = [];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

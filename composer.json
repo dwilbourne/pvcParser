@@ -19,6 +19,7 @@
 			"pvcExamples\\parser\\": "examples/"
 		}
 	},
+	"minimum-stability": "dev",
 	"require": {
 		"ext-intl": "*",
 		"ext-json": "*",

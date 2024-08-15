@@ -44,7 +44,6 @@ class IntegerParser extends NumericParser
     {
         $msgId = 'not_integer';
         $msgParameters = [];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

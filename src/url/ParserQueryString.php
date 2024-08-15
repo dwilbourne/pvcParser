@@ -138,7 +138,6 @@ class ParserQueryString extends Parser implements ParserQueryStringInterface
     {
         $msgId = 'invalid_querystring';
         $msgParameters = [];
-        $domain = 'Parser';
-        $msg->setContent($domain, $msgId, $msgParameters);
+        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }

@@ -2,33 +2,24 @@
 
 /**
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
+ * @noinspection PhpCSValidationInspection
  */
+
 declare (strict_types=1);
 
 namespace pvcTests\parser\date_time;
 
-use DateTimeImmutable;
 use DateTimeZone;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
-use pvc\interfaces\intl\LocaleInterface;
-use pvc\interfaces\intl\TimeZoneInterface;
-use pvc\interfaces\msg\MsgInterface;
+use IntlDateFormatter;
 use pvc\parser\date_time\ParserDateShort;
 
-class ParserDateShortTest extends TestCase
+class ParserDateShortTest extends ParserDateTimeTestMaster
 {
-    protected MsgInterface|MockObject $msg;
-
-    protected LocaleInterface|MockObject $locale;
-
-    protected TimeZoneInterface|MockObject $timeZone;
-
     public function setUp(): void
     {
-        $this->msg = $this->createMock(MsgInterface::class);
-        $this->locale = $this->createMock(LocaleInterface::class);
-        $this->timeZone = $this->createMock(TimeZoneInterface::class);
+        parent::setUp();
+        $tz = new DateTimeZone('America/New_York');
+        $this->parser = new ParserDateShort($this->msg, $this->locale, $tz);
     }
 
     /**
@@ -37,9 +28,8 @@ class ParserDateShortTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $this->timeZone->method('__toString')->willReturn('America/New_York');
-        $parser = new ParserDateShort($this->msg, $this->locale, $this->timeZone);
-        self::assertInstanceOf(ParserDateShort::class, $parser);
+        self::assertInstanceOf(ParserDateShort::class, $this->parser);
+        self::assertEquals(IntlDateFormatter::SHORT, $this->parser->getDateType());
     }
 
     /**
@@ -50,8 +40,12 @@ class ParserDateShortTest extends TestCase
      * @param mixed $dtStringAtom either false or DateTimeInterface::ATOM
      * @param string $comment
      * @dataProvider parserDateShortDataProvider
-     * @covers       \pvc\parser\date_time\ParserDateShort::parseValue
-     * @covers       \pvc\parser\date_time\ParserDateShort::setMsgContent
+     * @covers \pvc\parser\date_time\ParserDateShort::parseValue
+     * @covers \pvc\parser\date_time\ParserDateShort::setMsgContent
+     *
+     * This testing is really for illustration only - it demonstrates the behavior of the IntlDateFormatter's
+     * parse method.  Since it is a stock object in PHP, there is no point in 'unit testing' it, but it can
+     * be helpful to see test output to see how it behaves with various inputs.
      */
     public function testParseValue(
         string $localeString,
@@ -60,35 +54,30 @@ class ParserDateShortTest extends TestCase
         mixed $dtStringAtom,
         string $comment
     ): void {
-        $this->locale->method('__toString')->willReturn($localeString);
-        $this->timeZone->method('__toString')->willReturn($tzString);
-        if ((bool)$dtStringAtom == false) {
-            $this->msg->expects($this->once())->method('setContent');
-            $expectedResult = false;
-        } else {
-            /**
-             * convert the string to a timestamp
-             */
-            $tz = new DateTimeZone($tzString);
-            $dt = new DateTimeImmutable((string)$dtStringAtom, $tz);
-            $expectedResult = $dt->getTimestamp();
-        }
-        $parser = new ParserDateShort($this->msg, $this->locale, $this->timeZone);
-        $result = ($parser->parse($input) ? $parser->getParsedValue() : false);
-        self::assertEquals($expectedResult, $result, $comment);
+        parent::testParseValue(
+            $localeString,
+            $tzString,
+            $input,
+            $dtStringAtom,
+            $comment
+        );
     }
 
     public function parserDateShortDataProvider(): array
     {
         return [
-            ['en_US', 'America/New_York', '5/9/96', '1996-05-09', 'failed to parse 5/9/96'],
+            'basic example' => ['en_US', 'America/New_York', '5/9/96', '1996-05-09', 'failed to parse 5/9/96'],
+            '4 digit year' => ['en_US', 'America/New_York', '5/9/1996', '1996-05-09', 'failed to parse 5/9/96'],
+            'germany goes d/m/y' => ['de_DE', 'Europe/Berlin', '09-02-2014', '2014-02-09', 'failed to parse 09-02-2014'],
+            'single digits' => ['de_DE', 'Europe/Berlin', '9-2-2014', '2014-02-09', 'failed to parse 9-2-2014'],
+            'cannot do just a year' => ['de_DE', 'Europe/Berlin', '2014', false, 'wrongly parsed 2014'],
             /**
              * demonstrate the parser's tolerance of different separators.  These are three permitted separators
-             * without resorting so a proprietary pattern
+             * without resorting to a proprietary pattern
              */
             ['de_DE', 'Europe/Berlin', '10-02-14', '2014-02-10', 'failed to parse 10-02-14'],
             ['de_DE', 'Europe/Berlin', '10.02.14', '2014-02-10', 'failed to parse 10.02.14'],
-            ['de_DE', 'Europe/Berlin', '10/02/14', '2014-02-10', 'failed to parse 10/02/14'],
+            ['de_DE', 'Europe/Berlin', '10/2/14', '2014-02-10', 'failed to parse 10/2/14'],
             /**
              * and this one fails....
              */
