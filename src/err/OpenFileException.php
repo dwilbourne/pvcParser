@@ -12,9 +12,9 @@ use pvc\err\stock\RuntimeException;
 use Throwable;
 
 /**
- * Class FileHandleException
+ * Class OpenFileException
  */
-class FileHandleException extends RuntimeException
+class OpenFileException extends RuntimeException
 {
     public function __construct(string $fileName, Throwable $prev = null)
     {

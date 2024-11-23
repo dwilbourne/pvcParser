@@ -31,7 +31,8 @@ class _ParserXData extends XDataAbstract
             InvalidReturnTypeException::class => 1009,
             InvalidQuerystringSeparatorException::class => 1010,
             InvalidDateTimeTypeException::class => 1011,
-            FileHandleException::class => 1012,
+            OpenFileException::class => 1012,
+            CsvParserException::class => 1013,
         ];
     }
 
@@ -50,7 +51,8 @@ class _ParserXData extends XDataAbstract
             InvalidDateTimeTypeException::class => 'Invalid Date Type / Time Type specified - see documentation for the php IntlDateFormatter class',
             InvalidReturnTypeException::class => 'Invalid return type, must be either NumberFormatter::TYPE_INT64, or NumberFormatter::TYPE_DOUBLE',
             InvalidQuerystringSeparatorException::class => 'Querystring separator cannot be empty.',
-            FileHandleException::class => 'Error trying to open file ${fileName}',
+            OpenFileException::class => 'Error trying to open file ${fileName}',
+            CsvParserException::class => 'Error parsing a line in csv file ${fileName}.'
         ];
     }
 }

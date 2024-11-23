@@ -17,7 +17,7 @@ use pvc\parser\err\InvalidEscapeCharacterException;
 use pvc\parser\err\InvalidFieldDelimiterException;
 use pvc\parser\err\InvalidFieldEnclosureCharException;
 use pvc\parser\err\NonExistentColumnHeadingException;
-use pvc\parser\err\NonExistentFilePathException;
+use pvc\parser\err\OpenFileException;
 use stdClass;
 
 /**
@@ -214,7 +214,7 @@ class CsvParserTest extends TestCase
     {
         $fileName = 'foo';
         $badFixture = $this->makeFixtureFilePath($fileName);
-        self::expectException(NonExistentFilePathException::class);
+        self::expectException(OpenFileException::class);
         $this->parser->parse($badFixture);
     }
 

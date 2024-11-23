@@ -8,15 +8,16 @@ declare(strict_types=1);
 namespace pvc\parser\csv;
 
 use pvc\interfaces\msg\MsgInterface;
+use pvc\parser\err\CsvParserException;
 use pvc\parser\err\DuplicateColumnHeadingException;
-use pvc\parser\err\FileHandleException;
 use pvc\parser\err\InvalidColumnHeadingException;
 use pvc\parser\err\InvalidEscapeCharacterException;
 use pvc\parser\err\InvalidFieldDelimiterException;
 use pvc\parser\err\InvalidFieldEnclosureCharException;
 use pvc\parser\err\NonExistentColumnHeadingException;
-use pvc\parser\err\NonExistentFilePathException;
+use pvc\parser\err\OpenFileException;
 use pvc\parser\Parser;
+use Throwable;
 
 /**
  * Class CsvParser.  This class restricts record termination characters to be either LF or CRLF (windows).  PHP is
@@ -199,14 +200,13 @@ class CsvParser extends Parser
      */
     protected function parseValue(string $data): bool
     {
-        if (!file_exists($data)) {
-            throw new NonExistentFilePathException($data);
-        } else {
-            if (false == ($handle = fopen($data, 'r'))) {
-                throw new FileHandleException($data);
-            }
-            $this->filePath = $data;
+        try {
+            $handle = fopen($data, 'r');
+        } catch (Throwable $e) {
+            throw new OpenFileException($data, $e);
         }
+        assert($handle !== false);
+        $this->filePath = $data;
 
         $bom = "\xef\xbb\xbf";
         if (fgets($handle, 4) !== $bom) {
@@ -231,12 +231,10 @@ class CsvParser extends Parser
         }
 
         /**
-         * if we are not at the end of the file then fgetcsv returned false because it could not parse a line.  Dunno
-         * that I know how to make it fail, but just to be safe.....
+         * if we are not at the end of the file then fgetcsv returned false because it could not parse a line.
          */
         if (!feof($handle)) {
-            $this->setMsgContent($this->getMsg());
-            return false;
+            throw new CsvParserException($data);
         }
         fclose($handle);
 
@@ -272,10 +270,7 @@ class CsvParser extends Parser
         return true;
     }
 
-    protected function setMsgContent(MsgInterface $msg): void
+    public function setMsgContent(MsgInterface $msg): void
     {
-        $msgId = 'csv_parser_failure';
-        $msgParameters = ['filePath' => $this->filePath];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
     }
 }
