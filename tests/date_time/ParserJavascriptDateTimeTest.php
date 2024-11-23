@@ -49,11 +49,12 @@ class ParserJavascriptDateTimeTest extends TestCase
             'no timezone' => ['2012-07-15T13:54:56', '2012-07-15T13:54:56', '', 'failed to parse 2012-07-15T13:54:56'],
             'no time' => ['2012-07-15', '2012-07-15T00:00:00', '', 'failed to parse 2012-07-15'],
             'partial date' => ['2012-07', '2012-07-01T00:00:00', '', 'failed to parse 2012-07'],
+
+
             /*
-             * this appears to be a bug in PHP 8.3 (and perhaps earlier).  '2012' as input returns the
-             * current date/time on my machine instead of '2012:01:01T00:00:00'.
-             * 'year only' => ['2012', '2012-01-01T00:00:00', '', 'failed to parse 2012'],
-            */
+             * '2012' as input is interpreted as a time on the current date.
+             * 'year only' => ['2012', ?? depends what day you run the test! ??, '', 'parses 2012 as a time'],
+             */
         ];
     }
 
