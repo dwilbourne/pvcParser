@@ -9,6 +9,7 @@ namespace pvc\parser\url;
 
 use pvc\interfaces\http\UrlInterface;
 use pvc\interfaces\msg\MsgInterface;
+use pvc\interfaces\validator\ValTesterInterface;
 use pvc\parser\Parser;
 
 /**
@@ -19,10 +20,13 @@ class ParserUrl extends Parser
 {
     protected UrlInterface $url;
 
-    public function __construct(MsgInterface $msg, UrlInterface $url)
+    protected ValTesterInterface $urlTester;
+
+    public function __construct(MsgInterface $msg, UrlInterface $url, ValTesterInterface $urlTester)
     {
         parent::__construct($msg);
         $this->url = $url;
+        $this->urlTester = $urlTester;
     }
 
     public function getUrl(): UrlInterface
@@ -42,15 +46,21 @@ class ParserUrl extends Parser
      */
     public function parseValue(string $data): bool
     {
-        $parsedResult = parse_url($data);
-
-        if (false === $parsedResult) {
+        /**
+         * parse_url will happily mangle the results of urls which are not well-formed, so we have to validate the
+         * url first
+         */
+        if (!$this->urlTester->testValue($data)) {
             return false;
-        } else {
-            $this->url->setAttributesFromArray($parsedResult);
-            $this->parsedValue = $this->url;
-            return true;
         }
+
+        if (false === ($urlParts = parse_url($data))) {
+            return false;
+        }
+
+        $this->url->setAttributesFromArray($urlParts);
+        $this->parsedValue = $this->url;
+        return true;
     }
 
     /**

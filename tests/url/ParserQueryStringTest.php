@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace pvcTests\parser\url;
 
+use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use pvc\http\err\InvalidQuerystringException;
 use pvc\interfaces\http\QueryStringInterface;
 use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\err\InvalidQuerystringSeparatorException;
@@ -130,8 +130,8 @@ class ParserQueryStringTest extends TestCase
          * the try throw catch in ParserQueryString catches any exception.  In real life, the QueryString object
          * throws an InvalidQueryStringException, but it's not important to this test.
          */
-        $this->qstr->method('setParams')
-                   ->willThrowException(new InvalidQuerystringException());
+        $this->qstr->expects($this->once())->method('setParams')
+            ->willThrowException(new Exception());
         $this->msg->expects($this->once())->method('setContent');
         self::assertFalse($this->parser->parse($testQstr));
     }

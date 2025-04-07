@@ -35,6 +35,7 @@ class _ParserXDataTest extends XDataTestMaster
      * @covers \pvc\parser\err\NonExistentFilePathException
      * @covers \pvc\parser\err\OpenFileException
      * @covers \pvc\parser\err\CsvParserException
+     * @covers \pvc\parser\err\InvalidUrlException
      *
      */
     public function testParserXData(): void

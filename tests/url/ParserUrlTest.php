@@ -11,6 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use pvc\interfaces\http\UrlInterface;
 use pvc\interfaces\msg\MsgInterface;
+use pvc\interfaces\validator\ValTesterInterface;
 use pvc\parser\url\ParserUrl;
 
 /**
@@ -24,11 +25,14 @@ class ParserUrlTest extends TestCase
 
     protected ParserUrl $parser;
 
+    protected ValTesterInterface|MockObject $urlTester;
+
     public function setUp(): void
     {
         $this->msg = $this->createMock(MsgInterface::class);
         $this->url = $this->createMock(UrlInterface::class);
-        $this->parser = new ParserUrl($this->msg, $this->url);
+        $this->urlTester = $this->createMock(ValTesterInterface::class);
+        $this->parser = new ParserUrl($this->msg, $this->url, $this->urlTester);
     }
 
     /**
@@ -70,6 +74,7 @@ class ParserUrlTest extends TestCase
             'fragment' => 'anchor'
         ];
         $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }
 
@@ -86,6 +91,7 @@ class ParserUrlTest extends TestCase
             'query' => 'googleguy=googley',
         ];
         $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }
 
@@ -96,11 +102,10 @@ class ParserUrlTest extends TestCase
      */
     public function testBadlyFormedUrls(): void
     {
-        $this->msg->expects($this->exactly(3))->method('setContent');
-        $badUrls = ['http:///example.com', 'http://:80', 'http://user@:80'];
-        foreach ($badUrls as $badUrl) {
-            self::assertFalse($this->parser->parse($badUrl));
-        }
+        $this->urlTester->method('testValue')->willReturn(false);
+        $this->msg->expects($this->once())->method('setContent');
+        $badUrl = 'anyvalue';
+        self::assertFalse($this->parser->parse($badUrl));
     }
 
     /**
@@ -127,6 +132,7 @@ class ParserUrlTest extends TestCase
             'fragment' => '[]',
         ];
         $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }
 
@@ -155,6 +161,7 @@ class ParserUrlTest extends TestCase
             'path' => $pathWithMultibyteCharSmileyFace,
         ];
         $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }
 
@@ -174,17 +181,13 @@ class ParserUrlTest extends TestCase
         $illegalChar = chr(0x7);
         $host = $hostFirstPart . $illegalChar . $hostLastPart;
 
-        $urlString = 'http://' . $host;
+        $urlString = $scheme . $host;
 
         /**
-         * documentation on parse_url says illegal characters are replaced by '_'.
+         * look in the pvc http library and you will see this same test showing that the actual ValTesterUrl class
+         * does in fact return false on this example
          */
-        $expectedHost = $hostFirstPart . '_' . $hostLastPart;
-        $values = [
-            'scheme' => 'http',
-            'host' => $expectedHost,
-        ];
-        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
-        self::assertTrue($this->parser->parse($urlString));
+        $this->urlTester->method('testValue')->willReturn(false);
+        self::assertFalse($this->parser->parse($urlString));
     }
 }

@@ -33,6 +33,7 @@ class _ParserXData extends XDataAbstract
             InvalidDateTimeTypeException::class => 1011,
             OpenFileException::class => 1012,
             CsvParserException::class => 1013,
+            InvalidUrlException::class => 1014,
         ];
     }
 
@@ -52,7 +53,8 @@ class _ParserXData extends XDataAbstract
             InvalidReturnTypeException::class => 'Invalid return type, must be either NumberFormatter::TYPE_INT64, or NumberFormatter::TYPE_DOUBLE',
             InvalidQuerystringSeparatorException::class => 'Querystring separator cannot be empty.',
             OpenFileException::class => 'Error trying to open file ${fileName}',
-            CsvParserException::class => 'Error parsing a line in csv file ${fileName}.'
+            CsvParserException::class => 'Error parsing a line in csv file ${fileName}.',
+            InvalidUrlException::class => 'Invalid url ${badUrl} could not be parsed.',
         ];
     }
 }

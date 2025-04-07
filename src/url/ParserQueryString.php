@@ -7,12 +7,12 @@ declare(strict_types=1);
 
 namespace pvc\parser\url;
 
-use pvc\err\stock\Exception;
 use pvc\interfaces\http\QueryStringInterface;
 use pvc\interfaces\msg\MsgInterface;
 use pvc\interfaces\parser\ParserQueryStringInterface;
 use pvc\parser\err\InvalidQuerystringSeparatorException;
 use pvc\parser\Parser;
+use Throwable;
 
 /**
  * Class ParserQueryString
@@ -126,7 +126,7 @@ class ParserQueryString extends Parser implements ParserQueryStringInterface
 
         try {
             $this->getQueryString()->setParams($params);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             /** swallow the exception - parsers just return false if they fail */
             return false;
         }

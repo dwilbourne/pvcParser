@@ -16,6 +16,7 @@ use pvc\interfaces\parser\ParserInterface;
  *
  * Class Parser
  * @template DataType
+ * @implements ParserInterface<DataType>
  */
 abstract class Parser implements ParserInterface
 {
