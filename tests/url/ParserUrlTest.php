@@ -184,8 +184,8 @@ class ParserUrlTest extends TestCase
         $urlString = $scheme . $host;
 
         /**
-         * look in the pvc http library and you will see this same test showing that the actual ValTesterUrl class
-         * does in fact return false on this example
+         * look in the pvc filter_var library and you will see this same test showing that the actual
+         * FilterVarvalidateUrl class does in fact return false on this example
          */
         $this->urlTester->method('testValue')->willReturn(false);
         self::assertFalse($this->parser->parse($urlString));
