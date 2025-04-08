@@ -45,18 +45,6 @@ class ParserUrlTest extends TestCase
     }
 
     /**
-     * testSetGetUrl
-     * @covers \pvc\parser\url\ParserUrl::setUrl
-     * @covers \pvc\parser\url\ParserUrl::getUrl
-     */
-    public function testSetGetUrl(): void
-    {
-        $url = $this->createMock(UrlInterface::class);
-        $this->parser->setUrl($url);
-        self::assertEquals($url, $this->parser->getUrl());
-    }
-
-    /**
      * testParseUrlStringBasic
      * @covers \pvc\parser\url\ParserUrl::parseValue
      */

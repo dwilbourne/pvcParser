@@ -20,23 +20,21 @@ class ParserUrl extends Parser
 {
     protected UrlInterface $url;
 
+    /**
+     * @var ValTesterInterface<string>
+     */
     protected ValTesterInterface $urlTester;
 
+    /**
+     * @param MsgInterface $msg
+     * @param UrlInterface $url
+     * @param ValTesterInterface<string> $urlTester
+     */
     public function __construct(MsgInterface $msg, UrlInterface $url, ValTesterInterface $urlTester)
     {
         parent::__construct($msg);
         $this->url = $url;
         $this->urlTester = $urlTester;
-    }
-
-    public function getUrl(): UrlInterface
-    {
-        return $this->url;
-    }
-
-    public function setUrl(UrlInterface $url): void
-    {
-        $this->url = $url;
     }
 
     /**
