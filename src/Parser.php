@@ -8,8 +8,11 @@ declare(strict_types=1);
 
 namespace pvc\parser;
 
+use pvc\interfaces\msg\DomainCatalogLoaderInterface;
 use pvc\interfaces\msg\MsgInterface;
 use pvc\interfaces\parser\ParserInterface;
+use pvc\msg\DomainCatalogFileLoaderPhp;
+use pvc\msg\err\NonExistentDomainCatalogDirectoryException;
 
 /**
  * Parser creates a few default implementation methods for child classes that implement ParserInterface.
@@ -26,14 +29,24 @@ abstract class Parser implements ParserInterface
     protected MsgInterface $msg;
 
     /**
+     * @var DomainCatalogLoaderInterface
+     */
+    protected DomainCatalogLoaderInterface $catalogLoader;
+
+    /**
      * @var DataType
      */
     protected $parsedValue;
 
 
+    /**
+     * @throws NonExistentDomainCatalogDirectoryException
+     */
     public function __construct(MsgInterface $msg)
     {
-        $this->setMsg($msg);
+        $this->msg = $msg;
+        $this->catalogLoader = new DomainCatalogFileLoaderPhp();
+        $this->catalogLoader->setDomainCatalogDirectory(__DIR__.'/messages');
     }
 
     /**
@@ -45,13 +58,9 @@ abstract class Parser implements ParserInterface
         return $this->msg;
     }
 
-    /**
-     * setMsg
-     * @param MsgInterface $msg
-     */
-    public function setMsg(MsgInterface $msg): void
+    public function getDomainCatalogLoader(): DomainCatalogLoaderInterface
     {
-        $this->msg = $msg;
+        return $this->catalogLoader;
     }
 
     /**

@@ -36,7 +36,7 @@ class ParserJavascriptDateTime extends Parser
         $data = str_replace('Z', '', $data);
         try {
             /**
-             * if tz is ommitted, the local timezone is assumed EXCEPT if the timezone info is specified
+             * if tz is omitted, the local timezone is assumed EXCEPT if the timezone info is specified
              * in the input string.  If the input string contains timezone info, the timezone parameter
              * to the constructor is ignored.
              */
