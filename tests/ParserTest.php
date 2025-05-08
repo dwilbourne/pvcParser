@@ -35,14 +35,11 @@ class ParserTest extends TestCase
 
     /**
      * testSetGetMsg
-     * @covers \pvc\parser\Parser::setMsg
      * @covers \pvc\parser\Parser::getMsg
      */
     public function testSetGetMsg(): void
     {
-        $msg = $this->createMock(MsgInterface::class);
-        $this->parser->setMsg($msg);
-        self::assertEquals($msg, $this->parser->getMsg());
+        self::assertEquals($this->msg, $this->parser->getMsg());
     }
 
     /**

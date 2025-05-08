@@ -24,7 +24,7 @@
 		"ext-intl": "*",
 		"ext-json": "*",
 		"ext-iconv": "*",
-		"pvc/interfaces": "dev-removedefs",
+		"pvc/interfaces": "*",
 		"pvc/err": "*"
 	},
 	"require-dev": {

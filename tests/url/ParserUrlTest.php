@@ -61,7 +61,8 @@ class ParserUrlTest extends TestCase
             'query' => 'arg=value',
             'fragment' => 'anchor'
         ];
-        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->url->expects($this->once())->method('hydrateFromArray')
+            ->with($values);
         $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }
@@ -78,7 +79,8 @@ class ParserUrlTest extends TestCase
             'path' => '/path',
             'query' => 'googleguy=googley',
         ];
-        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->url->expects($this->once())->method('hydrateFromArray')
+            ->with($values);
         $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }
@@ -119,7 +121,8 @@ class ParserUrlTest extends TestCase
             'query' => '$',
             'fragment' => '[]',
         ];
-        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->url->expects($this->once())->method('hydrateFromArray')
+            ->with($values);
         $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }
@@ -148,7 +151,8 @@ class ParserUrlTest extends TestCase
             'host' => 'www.nowhere.com',
             'path' => $pathWithMultibyteCharSmileyFace,
         ];
-        $this->url->expects($this->once())->method('setAttributesFromArray')->with($values);
+        $this->url->expects($this->once())->method('hydrateFromArray')
+            ->with($values);
         $this->urlTester->method('testValue')->willReturn(true);
         self::assertTrue($this->parser->parse($urlString));
     }

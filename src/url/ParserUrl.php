@@ -56,7 +56,7 @@ class ParserUrl extends Parser
             return false;
         }
 
-        $this->url->setAttributesFromArray($urlParts);
+        $this->url->hydrateFromArray($urlParts);
         $this->parsedValue = $this->url;
         return true;
     }
