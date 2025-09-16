@@ -76,6 +76,8 @@ class CsvParser extends Parser
         foreach ($columnHeadings as $columnHeading) {
             /**
              * must be a string
+             *
+             * @phpstan-ignore-next-line
              */
             if (!is_string($columnHeading)) {
                 throw new InvalidColumnHeadingException();
@@ -221,7 +223,7 @@ class CsvParser extends Parser
             $this->getFieldDelimiterChar(),
             $this->getFieldEnclosureChar(),
             $this->getEscapeChar()
-            )))) {
+        )))) {
             /**
              * fgetcsv returns an array with a single element consisting of a null value if the line is empty
              */
@@ -247,6 +249,7 @@ class CsvParser extends Parser
          */
 
         if ($this->getFirstRowContainsColumnHeadings()) {
+            /** @var array<string> $firstRow */
             $firstRow = array_shift($rows);
             if ($firstRow) {
                 $this->setColumnHeadings($firstRow);

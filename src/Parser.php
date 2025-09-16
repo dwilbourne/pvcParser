@@ -19,7 +19,6 @@ use pvc\msg\err\NonExistentDomainCatalogDirectoryException;
  *
  * Class Parser
  * @template DataType
- * @implements ParserInterface<DataType>
  */
 abstract class Parser implements ParserInterface
 {
