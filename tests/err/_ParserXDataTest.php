@@ -18,6 +18,7 @@ class _ParserXDataTest extends XDataTestMaster
 {
     /**
      * testValidatorXData
+     *
      * @throws ReflectionException
      * @covers \pvc\parser\err\_ParserXData::getLocalXCodes
      * @covers \pvc\parser\err\_ParserXData::getXMessageTemplates
@@ -29,7 +30,7 @@ class _ParserXDataTest extends XDataTestMaster
      * @covers \pvc\parser\err\InvalidFieldEnclosureCharException
      * @covers \pvc\parser\err\InvalidLineTerminationException
      * @covers \pvc\parser\err\InvalidMsgIdException
-     * @covers \pvc\parser\err\InvalidQuerystringSeparatorException
+     * @covers \pvc\http\err\InvalidQuerystringSeparatorException
      * @covers \pvc\parser\err\InvalidReturnTypeException
      * @covers \pvc\parser\err\NonExistentColumnHeadingException
      * @covers \pvc\parser\err\NonExistentFilePathException
