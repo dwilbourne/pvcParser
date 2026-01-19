@@ -20,4 +20,5 @@ return [
     'not_decimal' => 'value is not a decimal number',
     'invalid_url' => 'string could not be parsed into a url',
     'invalid_querystring' => 'invalid querystring could not be processed',
+    'null' => 'data was not an empty string and could not be parsed to null'
 ];
