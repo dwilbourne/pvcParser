@@ -113,7 +113,6 @@ abstract class NumericParser extends Parser
             $this->parsedValue = $result;
             return true;
         } else {
-            $this->setMsgContent($this->msg);
             return false;
         }
     }

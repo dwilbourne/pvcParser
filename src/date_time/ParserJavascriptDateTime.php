@@ -50,13 +50,18 @@ class ParserJavascriptDateTime extends Parser
     }
 
     /**
-     * setMsgContent
-     * @param MsgInterface $msg
+     * @inheritDoc
      */
-    protected function setMsgContent(MsgInterface $msg): void
+    protected function getMsgId(): string
     {
-        $msgId = 'not_javascript_datetime';
-        $msgParameters = [];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'not_javascript_datetime';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
     }
 }

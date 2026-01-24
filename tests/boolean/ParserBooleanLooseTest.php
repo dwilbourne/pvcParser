@@ -46,7 +46,7 @@ class ParserBooleanLooseTest extends TestCase
 
         self::assertEquals($expectedResult, $this->parser->parse($input));
 
-        if ($expectedResult) {
+        if ($expectedResult === true) {
             self::assertEquals($parsedValue, $this->parser->getParsedValue());
         } else {
             self::assertNull($this->parser->getParsedValue());

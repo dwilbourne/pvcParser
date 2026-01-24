@@ -39,11 +39,19 @@ class IntegerParser extends NumericParser
         $this->getFrmtr()->setAttribute(NumberFormatter::PARSE_INT_ONLY, 1);
     }
 
-
-    protected function setMsgContent(MsgInterface $msg): void
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgId(): string
     {
-        $msgId = 'not_integer';
-        $msgParameters = [];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'not_integer';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
     }
 }

@@ -27,7 +27,7 @@ class ParserClassNode
         if (false === ($code = file_get_contents($fileName))) {
             throw new NonExistentFilePathException($fileName);
         }
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $parser = (new ParserFactory())->createForNewestSupportedVersion();
         $nodes = $parser->parse($code);
         if (empty($nodes)) {
             return null;

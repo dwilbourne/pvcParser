@@ -2,7 +2,6 @@
 
 namespace pvc\parser\null;
 
-use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\Parser;
 
 /**
@@ -29,10 +28,19 @@ class ParserNull extends Parser
         return false;
     }
 
-    protected function setMsgContent(MsgInterface $msg): void
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgId(): string
     {
-        $msgId = 'null';
-        $msgParameters = [];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'null';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
     }
 }

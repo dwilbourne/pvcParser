@@ -23,7 +23,7 @@ class NodeVisitorIntegrationTest extends TestCase
     {
         // parse myself
         $code = file_get_contents(__FILE__) ?: '';
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $parser = (new ParserFactory())->createForNewestSupportedVersion();
         try {
             $this->nodes = $parser->parse($code);
         } catch (Throwable $error) {

@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace pvc\parser\boolean;
 
-use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\Parser;
 
 /**
@@ -37,13 +36,18 @@ class ParserBooleanOneZero extends Parser
     }
 
     /**
-     * setMsgContent
-     * @param MsgInterface $msg
+     * @inheritDoc
      */
-    protected function setMsgContent(MsgInterface $msg): void
+    protected function getMsgId(): string
     {
-        $msgId = 'not_boolean_one_zero';
-        $msgParameters = [];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'not_boolean_one_zero';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
     }
 }

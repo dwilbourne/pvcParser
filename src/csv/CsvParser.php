@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace pvc\parser\csv;
 
-use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\err\CsvParserException;
 use pvc\parser\err\DuplicateColumnHeadingException;
 use pvc\parser\err\InvalidColumnHeadingException;
@@ -273,7 +272,19 @@ class CsvParser extends Parser
         return true;
     }
 
-    public function setMsgContent(MsgInterface $msg): void
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgId(): string
     {
+        return '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
     }
 }

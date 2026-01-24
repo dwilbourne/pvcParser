@@ -73,7 +73,7 @@ class ParserTest extends TestCase
         $expectedResult = true;
         $this->msg->expects($this->once())->method('clearContent');
         $this->parser->expects($this->once())->method('parseValue')->with('foo')->willReturn($expectedResult);
-        $this->parser->expects($this->never())->method('setMsgContent');
+        $this->msg->expects($this->never())->method('setContent');
         self::assertEquals($expectedResult, $this->parser->parse($mockInput));
     }
 
@@ -87,7 +87,7 @@ class ParserTest extends TestCase
         $expectedResult = false;
         $this->msg->expects($this->once())->method('clearContent');
         $this->parser->expects($this->once())->method('parseValue')->with('foo')->willReturn($expectedResult);
-        $this->parser->expects($this->once())->method('setMsgContent');
+        $this->msg->expects($this->once())->method('setContent');
         self::assertEquals($expectedResult, $this->parser->parse($mockInput));
     }
 }

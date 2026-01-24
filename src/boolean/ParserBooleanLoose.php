@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace pvc\parser\boolean;
 
-use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\Parser;
 
 /**
@@ -43,13 +42,19 @@ class ParserBooleanLoose extends Parser
     }
 
     /**
-     * setMsgContent
-     * @param MsgInterface $msg
+     * @inheritDoc
      */
-    protected function setMsgContent(MsgInterface $msg): void
+    protected function getMsgId(): string
     {
-        $msgId = 'not_boolean_loose';
-        $msgParameters = [];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'not_boolean_loose';
     }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
+    }
+
 }

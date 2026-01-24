@@ -19,13 +19,14 @@ use pvc\msg\err\NonExistentDomainCatalogDirectoryException;
  *
  * Class Parser
  * @template DataType
+ * @phpstan-import-type MsgContent from MsgInterface
  */
 abstract class Parser implements ParserInterface
 {
     /**
-     * @var MsgInterface
+     * @var MsgInterface|null
      */
-    protected MsgInterface $msg;
+    protected ?MsgInterface $msg;
 
     /**
      * @var DomainCatalogLoaderInterface
@@ -39,20 +40,36 @@ abstract class Parser implements ParserInterface
 
 
     /**
+     * @param  MsgInterface|null  $msg
+     * @param  DomainCatalogLoaderInterface|null  $catalogLoader
+     *
      * @throws NonExistentDomainCatalogDirectoryException
+     *
+     * $msg can be null and if it is then getMsg returns null.
+     * $catalogLoader can be null and if it is, the default is the domain
+     * catalog found in this library
      */
-    public function __construct(MsgInterface $msg)
-    {
+    public function __construct(
+        ?MsgInterface $msg = null,
+        ?DomainCatalogLoaderInterface $catalogLoader = null,
+    ) {
         $this->msg = $msg;
-        $this->catalogLoader = new DomainCatalogFileLoaderPhp();
-        $this->catalogLoader->setDomainCatalogDirectory(__DIR__.'/messages');
+        if ($catalogLoader) {
+            $this->catalogLoader = $catalogLoader;
+        } else {
+            $this->catalogLoader = new DomainCatalogFileLoaderPhp();
+            $this->catalogLoader->setDomainCatalogDirectory(
+                __DIR__.'/messages'
+            );
+        }
     }
 
     /**
      * getMsg
+     *
      * @return MsgInterface
      */
-    public function getMsg(): MsgInterface
+    public function getMsg(): ?MsgInterface
     {
         return $this->msg;
     }
@@ -75,7 +92,9 @@ abstract class Parser implements ParserInterface
 
     /**
      * parse
-     * @param string $data
+     *
+     * @param  string  $data
+     *
      * @return bool
      */
     public function parse(string $data): bool
@@ -84,7 +103,7 @@ abstract class Parser implements ParserInterface
          * clear the message content and the parsedValue attribute so that subsequent iterations of this same parser
          * does not leave a message or a parsed value leftover from a prior iteration.
          */
-        $this->getMsg()->clearContent();
+        $this->getMsg()?->clearContent();
         unset($this->parsedValue);
 
         /**
@@ -102,7 +121,11 @@ abstract class Parser implements ParserInterface
          * parse the value and set an appropriate message if the value cannot be parsed
          */
         if (!$this->parseValue($data)) {
-            $this->setMsgContent($this->getMsg());
+            $this->getMsg()?->setContent(
+                $this->getMsgDomain(),
+                $this->getMsgId(),
+                $this->getMsgParameters()
+            );
             return false;
         }
 
@@ -116,5 +139,13 @@ abstract class Parser implements ParserInterface
 
     abstract protected function parseValue(string $data): bool;
 
-    abstract protected function setMsgContent(MsgInterface $msg): void;
+    abstract protected function getMsgId(): string;
+
+    /**
+     * getMsgParameters
+     *
+     * @return array<mixed>
+     */
+    abstract protected function getMsgParameters(): array;
+
 }

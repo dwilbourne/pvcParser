@@ -26,10 +26,19 @@ class ParserDateShortTimeShort extends ParserDateTime
         parent::setTimeType(IntlDateFormatter::SHORT);
     }
 
-    protected function setMsgContent(MsgInterface $msg): void
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgId(): string
     {
-        $msgId = 'not_short_date_time';
-        $msgParameters = [];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'not_short_date_time';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
     }
 }

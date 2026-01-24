@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace pvc\parser\boolean;
 
-use pvc\interfaces\msg\MsgInterface;
 use pvc\parser\Parser;
 
 /**
@@ -55,15 +54,18 @@ class ParserBooleanTrueFalse extends Parser
     }
 
     /**
-     * setMsgContent
-     * @param MsgInterface $msg
+     * @inheritDoc
      */
-    protected function setMsgContent(MsgInterface $msg): void
+    protected function getMsgId(): string
     {
-        $msgId = 'not_true_or_false';
-        $text = 'case-sensitive';
-        $text .= ($this->isCaseSensitive() ? '' : 'not ') . $text;
-        $msgParameters = ['caseSensitive' => $text];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'not_boolean_one_zero';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [($this->isCaseSensitive() ? '' : 'not ').'case-sensitive'];
     }
 }

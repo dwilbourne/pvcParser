@@ -31,11 +31,19 @@ class DecimalParser extends NumericParser
         $this->setReturnType(NumberFormatter::TYPE_DOUBLE);
     }
 
-
-    protected function setMsgContent(MsgInterface $msg): void
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgId(): string
     {
-        $msgId = 'not_decimal';
-        $msgParameters = [];
-        $msg->setContent($this->getMsgDomain(), $msgId, $msgParameters);
+        return 'not_decimal';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getMsgParameters(): array
+    {
+        return [];
     }
 }

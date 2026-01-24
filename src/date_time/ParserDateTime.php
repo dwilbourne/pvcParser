@@ -170,6 +170,4 @@ abstract class ParserDateTime extends Parser
             return false;
         }
     }
-
-    abstract protected function setMsgContent(MsgInterface $msg): void;
 }
